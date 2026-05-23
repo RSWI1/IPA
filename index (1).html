@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>EditIPA · Offline IPA Editor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: radial-gradient(circle at 20% 30%, #0b0f1c, #03060c);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      color: #edf2ff;
+    }
+    .glass-panel {
+      max-width: 920px;
+      width: 100%;
+      background: rgba(12, 18, 28, 0.75);
+      backdrop-filter: blur(18px);
+      border-radius: 2rem;
+      border: 1px solid rgba(72, 187, 255, 0.18);
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .content { padding: 2rem; }
+    .brand { text-align: center; margin-bottom: 1.8rem; }
+    .brand h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #c0f2ff, #4d9eff, #a855f7);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(77, 158, 255, 0.2);
+      border-radius: 40px;
+      padding: 0.25rem 0.9rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #90e0ff;
+      border: 1px solid rgba(77,158,255,0.4);
+      margin-top: 0.6rem;
+    }
+    .desc { text-align: center; color: #9aa9c1; margin-top: 0.7rem; font-size: 0.9rem; }
+    .upload-zone {
+      background: rgba(20, 28, 40, 0.6);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1.5px dashed rgba(77, 158, 255, 0.45);
+      transition: 0.25s;
+      margin-bottom: 2rem;
+      cursor: pointer;
+    }
+    .upload-zone:hover { border-color: #4d9eff; background: rgba(32, 44, 68, 0.7); }
+    .upload-icon svg { width: 48px; height: 48px; stroke: #6c8eff; stroke-width: 1.5; margin-bottom: 0.8rem; }
+    .upload-hint { font-size: 0.75rem; color: #6c7d9e; margin-top: 0.5rem; }
+    .file-input { display: none; }
+    .btn {
+      background: linear-gradient(105deg, #1e2a3e, #0f172a);
+      border: 1px solid rgba(77, 158, 255, 0.4);
+      padding: 0.7rem 1.6rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      color: #eef5ff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: 0.2s;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .btn-primary {
+      background: linear-gradient(115deg, #0e6bff, #3b2ac6);
+      border: none;
+      box-shadow: 0 6px 14px rgba(0, 100, 255, 0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.05); }
+    .loader {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none; }
+    .editor-section {
+      margin-top: 1.2rem;
+      border-top: 1px solid rgba(72, 187, 255, 0.15);
+      padding-top: 1.5rem;
+    }
+    .editor-title {
+      font-weight: 700; font-size: 1.5rem;
+      background: linear-gradient(125deg, #fff, #9acdff);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 1rem;
+    }
+    .icon-area {
+      display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 1.4rem;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .app-icon-img {
+      width: 85px; height: 85px;
+      border-radius: 18px;
+      background: #11161f;
+      border: 1px solid rgba(255,255,255,0.15);
+      object-fit: cover;
+    }
+    .icon-change-btn {
+      background: #2a3649; border: none;
+      font-size: 0.7rem; padding: 0.3rem 1rem;
+      border-radius: 30px; color: white; cursor: pointer;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    .full-width { grid-column: span 2; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label {
+      font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; color: #9eb1d0;
+    }
+    .form-control {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid #2a3a50;
+      border-radius: 14px;
+      padding: 0.7rem 1rem;
+      color: #f0f6ff;
+      font-size: 0.85rem;
+      width: 100%;
+      font-family: 'Inter', monospace;
+    }
+    .form-control:focus { outline: none; border-color: #4d9eff; }
+    .checkbox-group {
+      flex-direction: row; align-items: center; gap: 0.7rem;
+      display: flex;
+    }
+    .checkbox-group label { text-transform: none; font-weight: 500; font-size: 0.85rem; }
+    .submit-area {
+      display: flex; justify-content: flex-end;
+      margin-top: 1.8rem; gap: 1rem;
+    }
+    .status-msg {
+      font-size: 0.8rem; margin-top: 1rem;
+      text-align: center; color: #7f9fcf;
+      min-height: 1.2rem;
+    }
+    .debug-log {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      font-size: 0.7rem;
+      font-family: monospace;
+      color: #aaa;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem 2rem 1.4rem;
+      font-size: 0.7rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      color: #5a6f8f;
+    }
+    @media (max-width: 680px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .full-width { grid-column: span 1; }
+      .content { padding: 1.5rem; }
+      .brand h1 { font-size: 1.9rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="glass-panel">
+  <div class="content">
+    <div class="brand">
+      <h1>✧ EditIPA ✧</h1>
+      <div class="badge">100% Offline — No Internet Required</div>
+      <p class="desc">Modify name, bundle ID, version, icon, file access — then rebuild & download.</p>
+    </div>
+
+    <div id="uploadZone" class="upload-zone">
+      <div class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+      <p>Click or drag & drop .ipa file</p>
+      <div class="upload-hint">Works completely offline — no CDN needed</div>
+    </div>
+    <input type="file" id="ipaFileInput" accept=".ipa" class="file-input" />
+
+    <div id="editorPanel" class="editor-section hidden">
+      <div class="editor-title">⚡ Editor</div>
+      <div class="icon-area">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.7rem;">
+          <img id="appIconImg" class="app-icon-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23222' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='67' font-size='40' text-anchor='middle' fill='%23777'%3E📱%3C/text%3E%3C/svg%3E">
+          <button id="changeIconBtn" class="icon-change-btn">Change icon</button>
+          <input type="file" id="iconUploadInput" accept="image/png,image/jpeg" style="display:none">
+        </div>
+        <div style="font-size:0.75rem; color:#8eaccf;">Replace app icon (PNG/JPEG)</div>
+      </div>
+
+      <form id="plistEditForm">
+        <div class="form-grid">
+          <div class="form-group full-width"><label>Display Name</label><input type="text" id="displayName" class="form-control" placeholder="App visible name"></div>
+          <div class="form-group"><label>Bundle Identifier</label><input type="text" id="bundleId" class="form-control" placeholder="com.example.app" required></div>
+          <div class="form-group"><label>Bundle Name</label><input type="text" id="bundleName" class="form-control" placeholder="AppName" required></div>
+          <div class="form-group"><label>Bundle Version</label><input type="text" id="bundleVersion" class="form-control" placeholder="1.0.0" required></div>
+          <div class="form-group"><label>Short Version</label><input type="text" id="shortVersion" class="form-control" placeholder="1.0.0" required></div>
+          <div class="form-group"><label>Minimum iOS</label><input type="text" id="minIOS" class="form-control" placeholder="12.0"></div>
+          <div class="form-group checkbox-group full-width">
+            <input type="checkbox" id="supportsFiles" style="width:18px;height:18px;">
+            <label>📁 Supports Files App (Document Browser + File Sharing)</label>
+          </div>
+        </div>
+        <div class="submit-area">
+          <button type="button" id="resetBtn" class="btn">Reset to original</button>
+          <button type="submit" class="btn btn-primary">✨ Build & Download IPA</button>
+        </div>
+        <div id="editorStatus" class="status-msg"></div>
+        <div id="debugLog" class="debug-log hidden"></div>
+      </form>
+    </div>
+    <div id="globalLoader" class="hidden" style="text-align:center; margin:1rem"><div class="loader"></div><span style="margin-left:8px">Loading IPA…</span></div>
+  </div>
+  <footer>Made with ⚡ by EditIPA — 100% client-side & offline</footer>
+</div>
+
+<script>
+/* ============================================================
+   DEBUG LOGGER
+   ============================================================ */
+function log(msg) {
+  console.log(msg);
+  var el = document.getElementById('debugLog');
+  if (el) {
+    el.classList.remove('hidden');
+    el.textContent += msg + '\n';
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+/* ============================================================
+   EMBEDDED MINIMAL PLIST LIBRARY
+   ============================================================ */
+(function(global) {
+  'use strict';
+
+  function parse(xml) {
+    log('Parsing plist XML...');
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(xml, 'application/xml');
+    var parserError = doc.querySelector('parsererror');
+    if (parserError) {
+      throw new Error('XML parse error: ' + parserError.textContent.substring(0, 100));
+    }
+    var plist = doc.querySelector('plist');
+    if (!plist) throw new Error('No <plist> root element found');
+    var root = plist.querySelector('dict, array, string, integer, real, true, false, date, data');
+    if (!root) throw new Error('No plist content found inside <plist>');
+    return parseNode(root);
+  }
+
+  function parseNode(node) {
+    var tag = node.tagName.toLowerCase();
+    switch(tag) {
+      case 'dict':
+        var obj = {};
+        var children = node.children;
+        var i = 0;
+        while (i < children.length) {
+          if (children[i].tagName.toLowerCase() === 'key') {
+            var keyName = children[i].textContent;
+            i++;
+            if (i < children.length) {
+              obj[keyName] = parseNode(children[i]);
+              i++;
+            }
+          } else {
+            i++;
+          }
+        }
+        return obj;
+      case 'array':
+        var arr = [];
+        var arrChildren = node.children;
+        for (var j = 0; j < arrChildren.length; j++) {
+          arr.push(parseNode(arrChildren[j]));
+        }
+        return arr;
+      case 'string': return node.textContent || '';
+      case 'integer': return parseInt(node.textContent || '0', 10);
+      case 'real': return parseFloat(node.textContent || '0');
+      case 'true': return true;
+      case 'false': return false;
+      case 'date': return new Date(node.textContent);
+      case 'data': return node.textContent || '';
+      default: return node.textContent || '';
+    }
+  }
+
+  function build(obj) {
+    var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n';
+    xml += '<plist version="1.0">\n';
+    xml += buildNode(obj, 0);
+    xml += '</plist>\n';
+    return xml;
+  }
+
+  function buildNode(val, indent) {
+    var pad = '';
+    for (var i = 0; i < indent; i++) pad += '  ';
+    if (val === null || val === undefined) {
+      return pad + '<string></string>\n';
+    }
+    if (typeof val === 'boolean') {
+      return pad + (val ? '<true/>' : '<false/>') + '\n';
+    }
+    if (typeof val === 'number') {
+      if (Number.isInteger(val)) return pad + '<integer>' + val + '</integer>\n';
+      return pad + '<real>' + val + '</real>\n';
+    }
+    if (typeof val === 'string') {
+      return pad + '<string>' + escapeXml(val) + '</string>\n';
+    }
+    if (val instanceof Date) {
+      return pad + '<date>' + val.toISOString() + '</date>\n';
+    }
+    if (Array.isArray(val)) {
+      var s = pad + '<array>\n';
+      for (var i = 0; i < val.length; i++) {
+        s += buildNode(val[i], indent + 1);
+      }
+      s += pad + '</array>\n';
+      return s;
+    }
+    var s2 = pad + '<dict>\n';
+    for (var key in val) {
+      if (val.hasOwnProperty(key)) {
+        s2 += pad + '  <key>' + escapeXml(key) + '</key>\n';
+        s2 += buildNode(val[key], indent + 1);
+      }
+    }
+    s2 += pad + '</dict>\n';
+    return s2;
+  }
+
+  function escapeXml(str) {
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&apos;');
+  }
+
+  global.plist = { parse: parse, build: build };
+})(window);
+
+/* ============================================================
+   EMBEDDED ROBUST JSZIP
+   ============================================================ */
+(function(global) {
+  'use strict';
+
+  // CRC32
+  var CRC_TABLE = new Uint32Array(256);
+  for (var i = 0; i < 256; i++) {
+    var c = i;
+    for (var j = 0; j < 8; j++) {
+      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    }
+    CRC_TABLE[i] = c >>> 0;
+  }
+
+  function crc32(data, crc) {
+    crc = (crc === undefined) ? 0xFFFFFFFF : (crc ^ 0xFFFFFFFF);
+    for (var i = 0; i < data.length; i++) {
+      crc = CRC_TABLE[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  // Adler32
+  function adler32(data) {
+    var a = 1, b = 0;
+    for (var i = 0; i < data.length; i++) {
+      a = (a + data[i]) % 65521;
+      b = (b + a) % 65521;
+    }
+    return ((b << 16) | a) >>> 0;
+  }
+
+  // Raw deflate using stored blocks only (most reliable)
+  function deflateRaw(data) {
+    var maxBlock = 65535;
+    var blocks = Math.ceil(data.length / maxBlock);
+    var out = [];
+    for (var b = 0; b < blocks; b++) {
+      var start = b * maxBlock;
+      var len = Math.min(maxBlock, data.length - start);
+      var isLast = (b === blocks - 1) ? 1 : 0;
+      out.push(isLast); // BFINAL
+      out.push(0); out.push(0); // BTYPE = stored
+      out.push(len & 0xFF); out.push((len >>> 8) & 0xFF);
+      out.push((~len) & 0xFF); out.push(((~len) >>> 8) & 0xFF);
+      for (var k = 0; k < len; k++) out.push(data[start + k]);
+    }
+    return new Uint8Array(out);
+  }
+
+  // Async raw inflate using browser-native DecompressionStream (handles all deflate block types)
+  async function inflateRawAsync(data) {
+    var ds = new DecompressionStream('deflate-raw');
+    var writer = ds.writable.getWriter();
+    var reader = ds.readable.getReader();
+    writer.write(data instanceof Uint8Array ? data : new Uint8Array(data));
+    writer.close();
+    var chunks = [];
+    var totalSize = 0;
+    while (true) {
+      var result = await reader.read();
+      if (result.done) break;
+      chunks.push(result.value);
+      totalSize += result.value.length;
+    }
+    var out = new Uint8Array(totalSize);
+    var offset = 0;
+    for (var c = 0; c < chunks.length; c++) { out.set(chunks[c], offset); offset += chunks[c].length; }
+    return out;
+  }
+
+  // Raw inflate (RFC 1951) - handles stored blocks
+  function inflateRaw(data) {
+    var out = [];
+    var i = 0;
+    while (i < data.length) {
+      var bfinal = data[i] & 1;
+      var btype = (data[i] >>> 1) & 3;
+      i++;
+      if (btype === 0) {
+        // stored - skip to byte boundary
+        while ((i * 8) % 8 !== 0) {
+          // Actually: stored blocks don't need bit alignment in raw deflate
+          // The header was already byte-aligned
+        }
+        if (i + 4 > data.length) throw new Error('Stored block header truncated');
+        var len = data[i] | (data[i+1] << 8);
+        var nlen = data[i+2] | (data[i+3] << 8);
+        i += 4;
+        if ((len ^ nlen) !== 0xFFFF) throw new Error('Invalid stored block: len=' + len + ' nlen=' + nlen);
+        if (i + len > data.length) throw new Error('Stored block data truncated: need ' + len + ' have ' + (data.length - i));
+        for (var k = 0; k < len; k++) {
+          out.push(data[i++]);
+        }
+      } else if (btype === 3) {
+        throw new Error('Invalid block type (3)');
+      } else {
+        throw new Error('Dynamic/fixed Huffman blocks not supported (type=' + btype + ')');
+      }
+      if (bfinal) break;
+    }
+    return new Uint8Array(out);
+  }
+
+  // zlib-wrapped deflate
+  function deflateZlib(data) {
+    var raw = deflateRaw(data);
+    var adler = adler32(data);
+    var out = new Uint8Array(raw.length + 6);
+    out[0] = 0x78; out[1] = 0x9C; // zlib header
+    out.set(raw, 2);
+    out[out.length - 4] = (adler >>> 24) & 0xFF;
+    out[out.length - 3] = (adler >>> 16) & 0xFF;
+    out[out.length - 2] = (adler >>> 8) & 0xFF;
+    out[out.length - 1] = adler & 0xFF;
+    return out;
+  }
+
+  // zlib-wrapped inflate
+  function inflateZlib(data) {
+    if (data.length < 6) throw new Error('Data too short for zlib: ' + data.length);
+    var cmf = data[0];
+    var flg = data[1];
+    if ((cmf & 0x0F) !== 8) throw new Error('Unknown compression method: ' + (cmf & 0x0F));
+    if (((cmf << 8) | flg) % 31 !== 0) {
+      // Some zips have bad headers but valid data, try anyway
+      log('Warning: bad zlib header checksum, attempting inflate anyway');
+    }
+    var raw = inflateRaw(data.slice(2, data.length - 4));
+    return raw;
+  }
+
+  function readUint32LE(data, offset) {
+    return (data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24)) >>> 0;
+  }
+  function readUint16LE(data, offset) {
+    return (data[offset] | (data[offset+1] << 8)) >>> 0;
+  }
+  function writeUint32LE(data, offset, val) {
+    data[offset] = val & 0xFF;
+    data[offset+1] = (val >>> 8) & 0xFF;
+    data[offset+2] = (val >>> 16) & 0xFF;
+    data[offset+3] = (val >>> 24) & 0xFF;
+  }
+  function writeUint16LE(data, offset, val) {
+    data[offset] = val & 0xFF;
+    data[offset+1] = (val >>> 8) & 0xFF;
+  }
+
+  function dosDate(d) {
+    var year = d.getFullYear();
+    if (year < 1980) year = 1980;
+    if (year > 2107) year = 2107;
+    return ((year - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  }
+  function dosTime(d) {
+    return (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  }
+
+  function utf8ToBytes(str) {
+    var bytes = [];
+    for (var i = 0; i < str.length; i++) {
+      var c = str.charCodeAt(i);
+      if (c < 0x80) bytes.push(c);
+      else if (c < 0x800) { bytes.push(0xC0 | (c >> 6), 0x80 | (c & 0x3F)); }
+      else if (c < 0xD800 || c >= 0xE000) { bytes.push(0xE0 | (c >> 12), 0x80 | ((c >> 6) & 0x3F), 0x80 | (c & 0x3F)); }
+      else {
+        i++;
+        c = 0x10000 + (((c & 0x3FF) << 10) | (str.charCodeAt(i) & 0x3FF));
+        bytes.push(0xF0 | (c >> 18), 0x80 | ((c >> 12) & 0x3F), 0x80 | ((c >> 6) & 0x3F), 0x80 | (c & 0x3F));
+      }
+    }
+    return new Uint8Array(bytes);
+  }
+  function bytesToUtf8(bytes) {
+    var chars = [];
+    var i = 0;
+    while (i < bytes.length) {
+      var c = bytes[i++];
+      if (c < 0x80) chars.push(c);
+      else if ((c & 0xE0) === 0xC0) {
+        chars.push(((c & 0x1F) << 6) | (bytes[i++] & 0x3F));
+      } else if ((c & 0xF0) === 0xE0) {
+        chars.push(((c & 0x0F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F));
+      } else {
+        var cp = ((c & 0x07) << 18) | ((bytes[i++] & 0x3F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F);
+        cp -= 0x10000;
+        chars.push(0xD800 + (cp >> 10), 0xDC00 + (cp & 0x3FF));
+      }
+    }
+    return String.fromCharCode.apply(null, chars);
+  }
+
+  function ZipFile() {
+    this.files = {};
+  }
+
+  ZipFile.prototype.file = function(name, data, opts) {
+    if (arguments.length === 1) {
+      var f = this.files[name];
+      if (!f) return null;
+      return {
+        async: function(type) {
+          return Promise.resolve(f._getData(type));
+        }
+      };
+    }
+    this.files[name] = new ZipEntry(name, data, opts || {});
+    return this;
+  };
+
+  function ZipEntry(name, data, opts) {
+    this.name = name;
+    this.data = data;
+    this.opts = opts;
+  }
+
+  ZipEntry.prototype._getData = function(type) {
+    var data = this.data;
+    if (type === 'blob') {
+      if (data instanceof Blob) return data;
+      if (data instanceof Uint8Array) return new Blob([data]);
+      if (data instanceof ArrayBuffer) return new Blob([new Uint8Array(data)]);
+      return new Blob([String(data)]);
+    }
+    if (type === 'arraybuffer') {
+      if (data instanceof ArrayBuffer) return data;
+      if (data instanceof Uint8Array) return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+      var b = utf8ToBytes(String(data));
+      return b.buffer;
+    }
+    if (type === 'string') {
+      if (typeof data === 'string') return data;
+      if (data instanceof Uint8Array) return bytesToUtf8(data);
+      return String(data);
+    }
+    return data;
+  };
+
+  // Scan for local file headers as fallback
+  async function scanLocalHeaders(buf) {
+    var files = {};
+    var pos = 0;
+    while (pos < buf.length - 30) {
+      if (buf[pos] === 0x50 && buf[pos+1] === 0x4B && buf[pos+2] === 0x03 && buf[pos+3] === 0x04) {
+        var ver = readUint16LE(buf, pos + 4);
+        var flags = readUint16LE(buf, pos + 6);
+        var method = readUint16LE(buf, pos + 8);
+        var time = readUint16LE(buf, pos + 10);
+        var date = readUint16LE(buf, pos + 12);
+        var crc = readUint32LE(buf, pos + 14);
+        var compSize = readUint32LE(buf, pos + 18);
+        var uncompSize = readUint32LE(buf, pos + 22);
+        var nameLen = readUint16LE(buf, pos + 26);
+        var extraLen = readUint16LE(buf, pos + 28);
+
+        if (pos + 30 + nameLen > buf.length) break;
+        var nameBytes = buf.slice(pos + 30, pos + 30 + nameLen);
+        var name = bytesToUtf8(nameBytes);
+
+        var dataStart = pos + 30 + nameLen + extraLen;
+        var dataEnd = dataStart + compSize;
+        if (dataEnd > buf.length) {
+          log('Local header data exceeds buffer for ' + name + ', trying to continue');
+          dataEnd = buf.length;
+          compSize = dataEnd - dataStart;
+        }
+
+        var compressedData = buf.slice(dataStart, dataEnd);
+        var uncompressedData;
+
+        if (method === 0) {
+          uncompressedData = compressedData;
+        } else if (method === 8) {
+          try {
+            uncompressedData = await inflateRawAsync(compressedData);
+          } catch(err) {
+            log('Inflate error for ' + name + ': ' + err.message + ', using raw');
+            uncompressedData = compressedData;
+          }
+        } else {
+          log('Unsupported method ' + method + ' for ' + name + ', using raw');
+          uncompressedData = compressedData;
+        }
+
+        files[name] = new ZipEntry(name, uncompressedData, { binary: true });
+        log('Scanned: ' + name + ' (' + uncompressedData.length + ' bytes)');
+
+        pos = dataEnd;
+      } else {
+        pos++;
+      }
+    }
+    return files;
+  }
+
+  ZipFile.prototype.loadAsync = function(data) {
+    var self = this;
+    return (async function() {
+      var buf;
+      if (data instanceof ArrayBuffer) buf = new Uint8Array(data);
+      else if (data instanceof Uint8Array) buf = data;
+      else throw new Error('Expected ArrayBuffer or Uint8Array, got ' + typeof data);
+
+      log('ZIP buffer size: ' + buf.length);
+
+      // Try EOCD method first
+      var pos = buf.length - 22;
+      var found = false;
+      var eocdPos = -1;
+      while (pos >= Math.max(0, buf.length - 65557)) {
+        if (buf[pos] === 0x50 && buf[pos+1] === 0x4B && buf[pos+2] === 0x05 && buf[pos+3] === 0x06) {
+          var commentLen = readUint16LE(buf, pos + 20);
+          if (pos + 22 + commentLen === buf.length) {
+            found = true;
+            eocdPos = pos;
+            break;
+          }
+        }
+        pos--;
+      }
+
+      if (!found) {
+        log('EOCD not found, falling back to local header scan');
+        self.files = await scanLocalHeaders(buf);
+        if (Object.keys(self.files).length === 0) throw new Error('Invalid zip: no local file headers found');
+        log('Local scan found ' + Object.keys(self.files).length + ' files');
+        return self;
+      }
+
+      log('EOCD found at ' + eocdPos);
+      var cdOffset = readUint32LE(buf, eocdPos + 16);
+      var cdSize = readUint32LE(buf, eocdPos + 12);
+      var numEntries = readUint16LE(buf, eocdPos + 8);
+      log('Entries: ' + numEntries + ', CD offset: ' + cdOffset + ', CD size: ' + cdSize);
+
+      // Check for Zip64
+      if (cdOffset === 0xFFFFFFFF || cdSize === 0xFFFFFFFF || numEntries === 0xFFFF) {
+        log('Zip64 detected, scanning local headers instead');
+        self.files = await scanLocalHeaders(buf);
+        if (Object.keys(self.files).length === 0) throw new Error('Zip64: local header scan failed');
+        log('Local scan found ' + Object.keys(self.files).length + ' files');
+        return self;
+      }
+
+      var cdPos = cdOffset;
+      var parsed = 0;
+      for (var e = 0; e < numEntries; e++) {
+        if (cdPos + 46 > buf.length) { log('CD truncated at entry ' + e + ', pos=' + cdPos); break; }
+        if (buf[cdPos] !== 0x50 || buf[cdPos+1] !== 0x4B || buf[cdPos+2] !== 0x01 || buf[cdPos+3] !== 0x02) {
+          log('Bad CD signature at entry ' + e + ', pos=' + cdPos + ': ' +
+              buf[cdPos].toString(16) + ' ' + buf[cdPos+1].toString(16) + ' ' +
+              buf[cdPos+2].toString(16) + ' ' + buf[cdPos+3].toString(16));
+          break;
+        }
+
+        var nameLen = readUint16LE(buf, cdPos + 28);
+        var extraLen = readUint16LE(buf, cdPos + 30);
+        var commentLen = readUint16LE(buf, cdPos + 32);
+        var localOffset = readUint32LE(buf, cdPos + 42);
+        var compMethod = readUint16LE(buf, cdPos + 10);
+        var compSize = readUint32LE(buf, cdPos + 20);
+        var uncompSize = readUint32LE(buf, cdPos + 24);
+        var crc = readUint32LE(buf, cdPos + 16);
+
+        if (cdPos + 46 + nameLen > buf.length) { log('CD entry name truncated at ' + e); break; }
+
+        var nameBytes = buf.slice(cdPos + 46, cdPos + 46 + nameLen);
+        var name = bytesToUtf8(nameBytes);
+
+        if (localOffset + 30 > buf.length) {
+          log('Local header out of bounds for ' + name + ' at offset ' + localOffset);
+          cdPos += 46 + nameLen + extraLen + commentLen;
+          continue;
+        }
+
+        var localNameLen = readUint16LE(buf, localOffset + 26);
+        var localExtraLen = readUint16LE(buf, localOffset + 28);
+        var dataStart = localOffset + 30 + localNameLen + localExtraLen;
+
+        if (compSize === 0xFFFFFFFF) compSize = buf.length - dataStart;
+
+        var dataEnd = dataStart + compSize;
+        if (dataEnd > buf.length) {
+          log('Data truncated for ' + name + ': start=' + dataStart + ' end=' + dataEnd + ' buflen=' + buf.length);
+          dataEnd = buf.length;
+          compSize = dataEnd - dataStart;
+        }
+
+        var compressedData = buf.slice(dataStart, dataEnd);
+        var uncompressedData;
+
+        if (compMethod === 0) {
+          uncompressedData = compressedData;
+        } else if (compMethod === 8) {
+          try {
+            uncompressedData = await inflateRawAsync(compressedData);
+            log('Inflated ' + name + ': ' + compressedData.length + ' -> ' + uncompressedData.length);
+          } catch(err) {
+            log('Inflate error for ' + name + ': ' + err.message);
+            uncompressedData = compressedData;
+          }
+        } else {
+          log('Unsupported method ' + compMethod + ' for ' + name);
+          uncompressedData = compressedData;
+        }
+
+        self.files[name] = new ZipEntry(name, uncompressedData, { binary: true, crc: crc });
+        parsed++;
+        cdPos += 46 + nameLen + extraLen + commentLen;
+      }
+
+      log('Parsed ' + parsed + ' entries from CD');
+      if (parsed === 0) {
+        log('CD parsing failed, falling back to local header scan');
+        self.files = await scanLocalHeaders(buf);
+      }
+
+      log('Total files: ' + Object.keys(self.files).length);
+      return self;
+    })();
+  };
+
+  ZipFile.prototype.generateAsync = function(opts) {
+    var self = this;
+    return (async function() {
+      var entries = [];
+      var cdEntries = [];
+      var offset = 0;
+      var now = new Date();
+
+      async function deflateRawAsync(dataBytes) {
+        var cs = new CompressionStream('deflate-raw');
+        var writer = cs.writable.getWriter();
+        var reader = cs.readable.getReader();
+        writer.write(dataBytes);
+        writer.close();
+        var chunks = [];
+        var totalSize = 0;
+        while (true) {
+          var r = await reader.read();
+          if (r.done) break;
+          chunks.push(r.value);
+          totalSize += r.value.length;
+        }
+        var out = new Uint8Array(totalSize);
+        var off = 0;
+        for (var ci = 0; ci < chunks.length; ci++) { out.set(chunks[ci], off); off += chunks[ci].length; }
+        return out;
+      }
+
+      for (var name in self.files) {
+        if (!self.files.hasOwnProperty(name)) continue;
+        var entry = self.files[name];
+        var nameBytes = utf8ToBytes(name);
+        var data = entry.data;
+
+        var dataBytes;
+        if (typeof data === 'string') dataBytes = utf8ToBytes(data);
+        else if (data instanceof Uint8Array) dataBytes = data;
+        else if (data instanceof ArrayBuffer) dataBytes = new Uint8Array(data);
+        else dataBytes = utf8ToBytes(String(data));
+
+        var uncompressedSize = dataBytes.length;
+        var compressedData;
+        var compMethod;
+        var compSize;
+
+        try {
+          compressedData = await deflateRawAsync(dataBytes);
+          if (compressedData.length < uncompressedSize) {
+            compMethod = 8;
+            compSize = compressedData.length;
+          } else {
+            compressedData = dataBytes;
+            compMethod = 0;
+            compSize = uncompressedSize;
+          }
+        } catch(err) {
+          compressedData = dataBytes;
+          compMethod = 0;
+          compSize = uncompressedSize;
+        }
+
+        var crc = crc32(dataBytes);
+
+        var localHeader = new Uint8Array(30 + nameBytes.length);
+        localHeader[0] = 0x50; localHeader[1] = 0x4B; localHeader[2] = 0x03; localHeader[3] = 0x04;
+        writeUint16LE(localHeader, 4, 20);
+        writeUint16LE(localHeader, 6, 0);
+        writeUint16LE(localHeader, 8, compMethod);
+        writeUint16LE(localHeader, 10, dosTime(now));
+        writeUint16LE(localHeader, 12, dosDate(now));
+        writeUint32LE(localHeader, 14, crc);
+        writeUint32LE(localHeader, 18, compSize);
+        writeUint32LE(localHeader, 22, uncompressedSize);
+        writeUint16LE(localHeader, 26, nameBytes.length);
+        writeUint16LE(localHeader, 28, 0);
+        localHeader.set(nameBytes, 30);
+
+        entries.push(localHeader);
+        entries.push(compressedData);
+
+        var cdEntry = new Uint8Array(46 + nameBytes.length);
+        cdEntry[0] = 0x50; cdEntry[1] = 0x4B; cdEntry[2] = 0x01; cdEntry[3] = 0x02;
+        writeUint16LE(cdEntry, 4, 20);
+        writeUint16LE(cdEntry, 6, 20);
+        writeUint16LE(cdEntry, 8, 0);
+        writeUint16LE(cdEntry, 10, compMethod);
+        writeUint16LE(cdEntry, 12, dosTime(now));
+        writeUint16LE(cdEntry, 14, dosDate(now));
+        writeUint32LE(cdEntry, 16, crc);
+        writeUint32LE(cdEntry, 20, compSize);
+        writeUint32LE(cdEntry, 24, uncompressedSize);
+        writeUint16LE(cdEntry, 28, nameBytes.length);
+        writeUint16LE(cdEntry, 30, 0);
+        writeUint16LE(cdEntry, 32, 0);
+        writeUint16LE(cdEntry, 34, 0);
+        writeUint16LE(cdEntry, 36, 0);
+        writeUint32LE(cdEntry, 38, 0);
+        writeUint32LE(cdEntry, 42, offset);
+        cdEntry.set(nameBytes, 46);
+
+        cdEntries.push(cdEntry);
+        offset += localHeader.length + compressedData.length;
+      }
+
+      var cdOffset = offset;
+      var cdSize = 0;
+      for (var i = 0; i < cdEntries.length; i++) cdSize += cdEntries[i].length;
+
+      var eocd = new Uint8Array(22);
+      eocd[0] = 0x50; eocd[1] = 0x4B; eocd[2] = 0x05; eocd[3] = 0x06;
+      writeUint16LE(eocd, 4, 0);
+      writeUint16LE(eocd, 6, 0);
+      writeUint16LE(eocd, 8, entries.length / 2);
+      writeUint16LE(eocd, 10, entries.length / 2);
+      writeUint32LE(eocd, 12, cdSize);
+      writeUint32LE(eocd, 16, cdOffset);
+      writeUint16LE(eocd, 20, 0);
+
+      var totalSize = 0;
+      for (var j = 0; j < entries.length; j++) totalSize += entries[j].length;
+      totalSize += cdSize + eocd.length;
+
+      var result = new Uint8Array(totalSize);
+      var pos = 0;
+      for (var k = 0; k < entries.length; k++) { result.set(entries[k], pos); pos += entries[k].length; }
+      for (var m = 0; m < cdEntries.length; m++) { result.set(cdEntries[m], pos); pos += cdEntries[m].length; }
+      result.set(eocd, pos);
+
+      return new Blob([result], {type: 'application/octet-stream'});
+    })();
+  };
+
+  global.JSZip = {
+    loadAsync: function(data) {
+      return new ZipFile().loadAsync(data);
+    }
+  };
+})(window);
+
+/* ============================================================
+   MAIN APP LOGIC
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function(){
+  var State = {
+    zip: null, plist: null, plistPath: null, appDir: null,
+    iconPath: null, originalPlistBuf: null, originalIconBlob: null,
+    newIconBlob: null, iconPreviewUrl: null
+  };
+
+  var uploadZone = document.getElementById('uploadZone');
+  var fileInput  = document.getElementById('ipaFileInput');
+  var editorPanel= document.getElementById('editorPanel');
+  var loader     = document.getElementById('globalLoader');
+  var appIconImg = document.getElementById('appIconImg');
+  var iconInput  = document.getElementById('iconUploadInput');
+  var changeBtn  = document.getElementById('changeIconBtn');
+  var form       = document.getElementById('plistEditForm');
+  var statusText = document.getElementById('editorStatus');
+  var resetBtn   = document.getElementById('resetBtn');
+
+  var inpDisplay = document.getElementById('displayName');
+  var inpBundleId= document.getElementById('bundleId');
+  var inpName    = document.getElementById('bundleName');
+  var inpVersion = document.getElementById('bundleVersion');
+  var inpShort   = document.getElementById('shortVersion');
+  var inpMinOS   = document.getElementById('minIOS');
+  var chkFiles   = document.getElementById('supportsFiles');
+
+  function setStatus(msg, isErr) {
+    statusText.textContent = msg || '';
+    statusText.style.color = isErr ? '#ff9f8f' : '#8bcbff';
+    if (isErr && msg) setTimeout(function(){ if(statusText.textContent===msg) statusText.textContent=''; }, 5000);
+  }
+  function showLoader(show, msg) {
+    loader.classList.toggle('hidden', !show);
+    if (show) setStatus(msg, false);
+  }
+  function clearForm() {
+    inpDisplay.value = inpBundleId.value = inpName.value = '';
+    inpVersion.value = inpShort.value = inpMinOS.value = '';
+    chkFiles.checked = false;
+    appIconImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23222' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='67' font-size='40' text-anchor='middle' fill='%23777'%3E📱%3C/text%3E%3C/svg%3E";
+    if (State.iconPreviewUrl) { URL.revokeObjectURL(State.iconPreviewUrl); State.iconPreviewUrl = null; }
+  }
+
+  function getIconBaseName(p) {
+    var icons = p && p.CFBundleIcons && p.CFBundleIcons.CFBundlePrimaryIcon && p.CFBundleIcons.CFBundlePrimaryIcon.CFBundleIconFiles;
+    if (Array.isArray(icons) && icons.length) return icons[0];
+    if (Array.isArray(p.CFBundleIconFiles) && p.CFBundleIconFiles.length) return p.CFBundleIconFiles[0];
+    if (typeof p.CFBundleIconFile === 'string') return p.CFBundleIconFile;
+    return null;
+  }
+  function findIconPath(zip, appDir, base) {
+    var clean = base.replace(/\.(png|jpg|jpeg)$/i, '');
+    var exts = ['.png', '.PNG', '.jpg', '.jpeg', '.JPG', ''];
+    for (var e = 0; e < exts.length; e++) {
+      var c = appDir + clean + exts[e];
+      if (zip.files[c]) return c;
+    }
+    for (var f in zip.files) {
+      if (zip.files.hasOwnProperty(f) && f.indexOf(appDir) === 0 && 
+          f.toLowerCase().indexOf(clean.toLowerCase()) !== -1 && 
+          /\.(png|jpg|jpeg)$/i.test(f)) return f;
+    }
+    return null;
+  }
+
+  async function populateUI(zip, p, plistPath, appDir) {
+    inpBundleId.value = p.CFBundleIdentifier || '';
+    inpName.value     = p.CFBundleName || '';
+    inpDisplay.value  = p.CFBundleDisplayName || p.CFBundleName || '';
+    inpVersion.value  = p.CFBundleVersion || '1.0';
+    inpShort.value    = p.CFBundleShortVersionString || '1.0';
+    inpMinOS.value    = p.MinimumOSVersion || '';
+    chkFiles.checked  = !!(p.UISupportsDocumentBrowser || p.UIFileSharingEnabled || p.LSSupportsOpeningDocumentsInPlace);
+
+    var base = getIconBaseName(p);
+    if (!base) { setStatus('No standard icon key found — you can still replace manually', false); return; }
+    var full = findIconPath(zip, appDir, base);
+    if (!full) { setStatus('⚠️ Icon file not found, but you can replace manually', false); return; }
+
+    State.iconPath = full;
+    var zf = zip.file(full);
+    if (!zf) { setStatus('⚠️ Icon entry missing in zip', false); return; }
+
+    var blob = await zf.async('blob');
+    State.originalIconBlob = blob;
+    if (State.iconPreviewUrl) URL.revokeObjectURL(State.iconPreviewUrl);
+    State.iconPreviewUrl = URL.createObjectURL(blob);
+    appIconImg.src = State.iconPreviewUrl;
+  }
+
+  async function resetOriginal() {
+    if (!State.zip || !State.originalPlistBuf || !State.plistPath) {
+      setStatus('Nothing to reset', true); return;
+    }
+    showLoader(true, 'Restoring original…');
+    try {
+      var orig = plist.parse(new TextDecoder().decode(State.originalPlistBuf));
+      State.plist = orig;
+      inpBundleId.value = orig.CFBundleIdentifier || '';
+      inpName.value     = orig.CFBundleName || '';
+      inpDisplay.value  = orig.CFBundleDisplayName || orig.CFBundleName || '';
+      inpVersion.value  = orig.CFBundleVersion || '1.0';
+      inpShort.value    = orig.CFBundleShortVersionString || '1.0';
+      inpMinOS.value    = orig.MinimumOSVersion || '';
+      chkFiles.checked  = !!(orig.UISupportsDocumentBrowser || orig.UIFileSharingEnabled || orig.LSSupportsOpeningDocumentsInPlace);
+
+      if (State.originalIconBlob && State.iconPath) {
+        var iconBuf = new Uint8Array(await State.originalIconBlob.arrayBuffer());
+        State.zip.file(State.iconPath, iconBuf, {binary:true});
+        if (State.iconPreviewUrl) URL.revokeObjectURL(State.iconPreviewUrl);
+        State.iconPreviewUrl = URL.createObjectURL(State.originalIconBlob);
+        appIconImg.src = State.iconPreviewUrl;
+        State.newIconBlob = null;
+      }
+      setStatus('✅ Reset to original', false);
+    } catch(e) { setStatus('Reset failed: ' + e.message, true); log('Reset error: ' + e.stack); }
+    finally { showLoader(false); }
+  }
+
+  async function injectIcon(zip, path, blob) {
+    var img = await new Promise(function(res, rej) {
+      var i = new Image();
+      i.onload = function() { res(i); };
+      i.onerror = function() { rej(new Error('Failed to decode image')); };
+      i.src = URL.createObjectURL(blob);
+    });
+    var cvs = document.createElement('canvas');
+    cvs.width = img.width; cvs.height = img.height;
+    cvs.getContext('2d').drawImage(img, 0, 0);
+    var png = await new Promise(function(r) { cvs.toBlob(r, 'image/png'); });
+    URL.revokeObjectURL(img.src);
+    if (!png) throw new Error('Canvas toBlob returned null');
+    var buf = new Uint8Array(await png.arrayBuffer());
+    zip.file(path, buf, {binary:true});
+    return png;
+  }
+
+  function downloadBlob(blob, name) {
+    if (blob.size === 0) throw new Error('Generated blob is empty');
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  async function buildAndDownload() {
+    if (!State.zip || !State.plist || !State.plistPath) {
+      setStatus('No IPA loaded. Please upload first.', true); return;
+    }
+    if (!inpBundleId.value.trim() || !inpName.value.trim()) {
+      setStatus('Bundle ID and Name are required', true); return;
+    }
+    showLoader(true, 'Building modified IPA…');
+    try {
+      var next = {};
+      for (var k in State.plist) { if (State.plist.hasOwnProperty(k)) next[k] = State.plist[k]; }
+      next.CFBundleIdentifier = inpBundleId.value.trim();
+      next.CFBundleName = inpName.value.trim();
+      next.CFBundleDisplayName = inpDisplay.value.trim() || next.CFBundleName;
+      next.CFBundleVersion = inpVersion.value.trim();
+      next.CFBundleShortVersionString = inpShort.value.trim();
+      if (inpMinOS.value.trim()) next.MinimumOSVersion = inpMinOS.value.trim();
+
+      var enable = chkFiles.checked;
+      next.UISupportsDocumentBrowser = enable;
+      next.UIFileSharingEnabled = enable;
+      next.LSSupportsOpeningDocumentsInPlace = enable;
+
+      var xml = plist.build(next);
+      State.zip.file(State.plistPath, xml, {binary:false});
+      State.plist = next;
+
+      if (State.newIconBlob && State.iconPath) {
+        var pngBlob = await injectIcon(State.zip, State.iconPath, State.newIconBlob);
+        if (State.iconPreviewUrl) URL.revokeObjectURL(State.iconPreviewUrl);
+        State.iconPreviewUrl = URL.createObjectURL(pngBlob);
+        appIconImg.src = State.iconPreviewUrl;
+        State.newIconBlob = null;
+      } else if (State.newIconBlob && !State.iconPath) {
+        setStatus('⚠️ Icon selected but no original icon path found. Icon not injected.', true);
+      }
+
+      var blob = await State.zip.generateAsync({type:'blob'});
+      log('Generated blob size: ' + blob.size);
+      downloadBlob(blob, 'modified.ipa');
+      setStatus('✅ IPA built & downloaded', false);
+    } catch(err) {
+      log('Build error: ' + err.stack);
+      setStatus('Build error: ' + err.message, true);
+    } finally {
+      showLoader(false);
+    }
+  }
+
+  async function handleUpload(file) {
+    if (!file || !file.name.toLowerCase().endsWith('.ipa')) {
+      setStatus('Please select a valid .ipa file', true); return;
+    }
+    showLoader(true, 'Extracting IPA & parsing Info.plist…');
+    try {
+      log('Starting upload: ' + file.name + ' (' + file.size + ' bytes)');
+      var arrayBuf = await file.arrayBuffer();
+      log('File read into ArrayBuffer: ' + arrayBuf.byteLength + ' bytes');
+
+      var zip = await JSZip.loadAsync(arrayBuf);
+      log('JSZip loaded, files: ' + Object.keys(zip.files).length);
+
+      var plistPath = null;
+      for (var f in zip.files) {
+        if (zip.files.hasOwnProperty(f) && f.indexOf('Payload/') === 0 && f.endsWith('.app/Info.plist')) {
+          plistPath = f; break;
+        }
+      }
+      if (!plistPath) throw new Error('Payload/*.app/Info.plist not found');
+      log('Found plist at: ' + plistPath);
+
+      var zf = zip.file(plistPath);
+      if (!zf) throw new Error('Info.plist entry missing in zip');
+
+      var plistBuf = await zf.async('arraybuffer');
+      log('Plist buffer: ' + plistBuf.byteLength + ' bytes');
+
+      var plistText = new TextDecoder().decode(plistBuf);
+      log('Plist text length: ' + plistText.length);
+
+      var plistObj = plist.parse(plistText);
+      log('Plist parsed successfully');
+      log('Keys: ' + Object.keys(plistObj).join(', '));
+
+      State.zip = zip;
+      State.plist = plistObj;
+      State.plistPath = plistPath;
+      State.appDir = plistPath.substring(0, plistPath.lastIndexOf('/') + 1);
+      State.originalPlistBuf = plistBuf;
+      State.iconPath = null;
+      State.originalIconBlob = null;
+      State.newIconBlob = null;
+
+      var iconBase = getIconBaseName(plistObj);
+      log('Icon base name: ' + iconBase);
+      if (iconBase) {
+        var found = findIconPath(zip, State.appDir, iconBase);
+        if (found) {
+          State.iconPath = found;
+          log('Icon path: ' + found);
+        }
+      }
+
+      await populateUI(zip, plistObj, plistPath, State.appDir);
+      editorPanel.classList.remove('hidden');
+      setStatus('IPA loaded. Edit fields, then click Build.', false);
+    } catch(err) {
+      log('Upload error: ' + err.stack);
+      setStatus('Failed to load IPA: ' + err.message, true);
+      editorPanel.classList.add('hidden');
+      State.zip = State.plist = State.plistPath = null;
+    } finally {
+      showLoader(false);
+    }
+  }
+
+  uploadZone.addEventListener('click', function() { fileInput.click(); });
+  fileInput.addEventListener('change', function(e) { if(e.target.files[0]) handleUpload(e.target.files[0]); });
+  uploadZone.addEventListener('dragover', function(e) { e.preventDefault(); uploadZone.style.borderColor = '#0e6bff'; });
+  uploadZone.addEventListener('dragleave', function() { uploadZone.style.borderColor = 'rgba(77,158,255,0.45)'; });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault(); uploadZone.style.borderColor = 'rgba(77,158,255,0.45)';
+    var f = e.dataTransfer.files[0];
+    if (f && f.name.toLowerCase().endsWith('.ipa')) handleUpload(f);
+    else setStatus('Drop a valid .ipa file', true);
+  });
+
+  changeBtn.addEventListener('click', function() { iconInput.click(); });
+  iconInput.addEventListener('change', function(e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    State.newIconBlob = f;
+    var url = URL.createObjectURL(f);
+    appIconImg.src = url;
+    setStatus('New icon selected — will be applied on Build', false);
+  });
+
+  form.addEventListener('submit', function(e) { e.preventDefault(); buildAndDownload(); });
+  resetBtn.addEventListener('click', resetOriginal);
+  inpMinOS.addEventListener('blur', function() {
+    if (/^\d+$/.test(inpMinOS.value)) inpMinOS.value += '.0';
+  });
+});
+</script>
+</body>
+</html>
