@@ -359,22 +359,157 @@ function log(msg) {
 }
 
 /* ============================================================
-   EMBEDDED MINIMAL PLIST LIBRARY
+   EMBEDDED PLIST LIBRARY  (XML + binary bplist00)
    ============================================================ */
 (function(global) {
   'use strict';
 
-  function parse(xml) {
-    log('Parsing plist XML...');
+  /* ---------- shared helpers ---------- */
+  function readUintBE(buf, offset, size) {
+    var v = 0;
+    for (var i = 0; i < size; i++) v = (v * 256 + buf[offset + i]) >>> 0;
+    return v;
+  }
+  function readUint64BE(buf, offset) {
+    var hi = readUintBE(buf, offset, 4);
+    var lo = readUintBE(buf, offset + 4, 4);
+    return hi * 0x100000000 + lo; // safe for sizes < 2^53
+  }
+
+  /* ---------- binary plist parser (bplist00) ---------- */
+  function parseBinary(buf) {
+    if (!(buf instanceof Uint8Array)) buf = new Uint8Array(buf);
+    if (buf.length < 40) throw new Error('bplist too short: ' + buf.length);
+    // Trailer: last 32 bytes
+    var t = buf.length - 32;
+    var offsetIntSize = buf[t + 6];
+    var objRefSize    = buf[t + 7];
+    var numObjects    = readUint64BE(buf, t + 8);
+    var topObject     = readUint64BE(buf, t + 16);
+    var offTableOff   = readUint64BE(buf, t + 24);
+    if (offsetIntSize < 1 || offsetIntSize > 8) throw new Error('Bad bplist offsetIntSize: ' + offsetIntSize);
+    if (objRefSize    < 1 || objRefSize    > 8) throw new Error('Bad bplist objRefSize: '    + objRefSize);
+    // Build offset table
+    var offsets = new Array(numObjects);
+    for (var i = 0; i < numObjects; i++)
+      offsets[i] = readUintBE(buf, offTableOff + i * offsetIntSize, offsetIntSize);
+
+    function parseObject(idx) {
+      if (idx >= numObjects) throw new Error('bplist obj idx OOB: ' + idx);
+      var pos    = offsets[idx];
+      var marker = buf[pos++];
+      var type   = (marker >> 4) & 0xF;
+      var info   = marker & 0xF;
+
+      // For arrays/dicts/strings/data: count may follow if info nibble === 15
+      function readCount() {
+        if (info !== 15) return info;
+        var intMarker = buf[pos++];
+        var intType   = (intMarker >> 4) & 0xF;
+        if (intType !== 1) throw new Error('bplist expected int for count, got type 0x' + intType.toString(16));
+        var bytes = 1 << (intMarker & 0xF);
+        var n = 0;
+        for (var k = 0; k < bytes; k++) n = n * 256 + buf[pos++];
+        return n;
+      }
+
+      switch (type) {
+        case 0x0: // singleton
+          if (info === 8) return false;
+          if (info === 9) return true;
+          return null;
+
+        case 0x1: { // integer
+          var bytes = 1 << info;
+          if (bytes <= 4) {
+            var v = 0;
+            for (var k = 0; k < bytes; k++) v = v * 256 + buf[pos + k];
+            if (bytes === 4 && v >= 0x80000000) v -= 0x100000000;
+            return v;
+          }
+          // 8-byte int
+          var hi = readUintBE(buf, pos, 4), lo = readUintBE(buf, pos + 4, 4);
+          return (hi >= 0x80000000)
+            ? -(0x100000000 * (0xFFFFFFFF - hi) + (0xFFFFFFFF - lo) + 1)
+            : hi * 0x100000000 + lo;
+        }
+
+        case 0x2: { // real (IEEE 754 big-endian)
+          var dv = new DataView(buf.buffer, buf.byteOffset + pos);
+          if (info === 2) return dv.getFloat32(0, false);
+          if (info === 3) return dv.getFloat64(0, false);
+          return 0;
+        }
+
+        case 0x3: { // date (seconds since 2001-01-01)
+          var dv = new DataView(buf.buffer, buf.byteOffset + pos);
+          return new Date((dv.getFloat64(0, false) + 978307200) * 1000);
+        }
+
+        case 0x4: { // data blob
+          var count = readCount();
+          return buf.slice(pos, pos + count);
+        }
+
+        case 0x5: { // ASCII string
+          var count = readCount();
+          var s = '';
+          for (var k = 0; k < count; k++) s += String.fromCharCode(buf[pos + k]);
+          return s;
+        }
+
+        case 0x6: { // UTF-16BE string
+          var count = readCount();
+          var s = '';
+          for (var k = 0; k < count; k++)
+            s += String.fromCharCode((buf[pos + k * 2] << 8) | buf[pos + k * 2 + 1]);
+          return s;
+        }
+
+        case 0x8: { // UID (treat as integer)
+          return readUintBE(buf, pos, info + 1);
+        }
+
+        case 0xA: // array
+        case 0xC: { // set (treat as array)
+          var count = readCount();
+          var arr = [];
+          for (var k = 0; k < count; k++)
+            arr.push(parseObject(readUintBE(buf, pos + k * objRefSize, objRefSize)));
+          return arr;
+        }
+
+        case 0xD: { // dict
+          var count = readCount();
+          var obj = {};
+          for (var k = 0; k < count; k++) {
+            var keyRef = readUintBE(buf, pos + k             * objRefSize, objRefSize);
+            var valRef = readUintBE(buf, pos + (count + k)   * objRefSize, objRefSize);
+            obj[String(parseObject(keyRef))] = parseObject(valRef);
+          }
+          return obj;
+        }
+
+        default:
+          log('bplist: unknown type 0x' + type.toString(16) + ' at idx ' + idx);
+          return null;
+      }
+    }
+    return parseObject(topObject);
+  }
+
+  /* ---------- XML plist parser ---------- */
+  function parseXml(xml) {
+    log('Parsing XML plist...');
     var parser = new DOMParser();
     var doc = parser.parseFromString(xml, 'application/xml');
     var parserError = doc.querySelector('parsererror');
     if (parserError) {
       throw new Error('XML parse error: ' + parserError.textContent.substring(0, 100));
     }
-    var plist = doc.querySelector('plist');
-    if (!plist) throw new Error('No <plist> root element found');
-    var root = plist.querySelector('dict, array, string, integer, real, true, false, date, data');
+    var plistEl = doc.querySelector('plist');
+    if (!plistEl) throw new Error('No <plist> root element found');
+    var root = plistEl.querySelector('dict, array, string, integer, real, true, false, date, data');
     if (!root) throw new Error('No plist content found inside <plist>');
     return parseNode(root);
   }
@@ -382,41 +517,56 @@ function log(msg) {
   function parseNode(node) {
     var tag = node.tagName.toLowerCase();
     switch(tag) {
-      case 'dict':
+      case 'dict': {
         var obj = {};
-        var children = node.children;
-        var i = 0;
+        var children = node.children, i = 0;
         while (i < children.length) {
           if (children[i].tagName.toLowerCase() === 'key') {
-            var keyName = children[i].textContent;
-            i++;
-            if (i < children.length) {
-              obj[keyName] = parseNode(children[i]);
-              i++;
-            }
-          } else {
-            i++;
-          }
+            var keyName = children[i].textContent; i++;
+            if (i < children.length) { obj[keyName] = parseNode(children[i]); i++; }
+          } else { i++; }
         }
         return obj;
-      case 'array':
+      }
+      case 'array': {
         var arr = [];
-        var arrChildren = node.children;
-        for (var j = 0; j < arrChildren.length; j++) {
-          arr.push(parseNode(arrChildren[j]));
-        }
+        for (var j = 0; j < node.children.length; j++) arr.push(parseNode(node.children[j]));
         return arr;
-      case 'string': return node.textContent || '';
+      }
+      case 'string':  return node.textContent || '';
       case 'integer': return parseInt(node.textContent || '0', 10);
-      case 'real': return parseFloat(node.textContent || '0');
-      case 'true': return true;
-      case 'false': return false;
-      case 'date': return new Date(node.textContent);
-      case 'data': return node.textContent || '';
-      default: return node.textContent || '';
+      case 'real':    return parseFloat(node.textContent || '0');
+      case 'true':    return true;
+      case 'false':   return false;
+      case 'date':    return new Date(node.textContent);
+      case 'data':    return node.textContent || '';
+      default:        return node.textContent || '';
     }
   }
 
+  /* ---------- unified parse: accepts Uint8Array, ArrayBuffer, or string ---------- */
+  function parse(input) {
+    var buf;
+    if (typeof input === 'string') {
+      return parseXml(input);
+    }
+    if (input instanceof ArrayBuffer) buf = new Uint8Array(input);
+    else if (input instanceof Uint8Array) buf = input;
+    else throw new Error('plist.parse: unsupported input type');
+
+    // Detect binary plist magic: "bplist00"
+    if (buf.length >= 8 &&
+        buf[0] === 0x62 && buf[1] === 0x70 && buf[2] === 0x6C && buf[3] === 0x69 &&
+        buf[4] === 0x73 && buf[5] === 0x74 && buf[6] === 0x30 && buf[7] === 0x30) {
+      log('Detected binary plist (bplist00) — using binary parser');
+      return parseBinary(buf);
+    }
+
+    log('Parsing XML plist from buffer...');
+    return parseXml(new TextDecoder().decode(buf));
+  }
+
+  /* ---------- builder (always writes XML) ---------- */
   function build(obj) {
     var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n';
@@ -429,29 +579,24 @@ function log(msg) {
   function buildNode(val, indent) {
     var pad = '';
     for (var i = 0; i < indent; i++) pad += '  ';
-    if (val === null || val === undefined) {
-      return pad + '<string></string>\n';
-    }
-    if (typeof val === 'boolean') {
-      return pad + (val ? '<true/>' : '<false/>') + '\n';
-    }
+    if (val === null || val === undefined) return pad + '<string></string>\n';
+    if (typeof val === 'boolean') return pad + (val ? '<true/>' : '<false/>') + '\n';
     if (typeof val === 'number') {
       if (Number.isInteger(val)) return pad + '<integer>' + val + '</integer>\n';
       return pad + '<real>' + val + '</real>\n';
     }
-    if (typeof val === 'string') {
-      return pad + '<string>' + escapeXml(val) + '</string>\n';
-    }
-    if (val instanceof Date) {
-      return pad + '<date>' + val.toISOString() + '</date>\n';
+    if (typeof val === 'string') return pad + '<string>' + escapeXml(val) + '</string>\n';
+    if (val instanceof Date) return pad + '<date>' + val.toISOString() + '</date>\n';
+    if (val instanceof Uint8Array) {
+      // Binary data: encode as base64
+      var bin = '';
+      for (var i = 0; i < val.length; i++) bin += String.fromCharCode(val[i]);
+      return pad + '<data>' + btoa(bin) + '</data>\n';
     }
     if (Array.isArray(val)) {
       var s = pad + '<array>\n';
-      for (var i = 0; i < val.length; i++) {
-        s += buildNode(val[i], indent + 1);
-      }
-      s += pad + '</array>\n';
-      return s;
+      for (var i = 0; i < val.length; i++) s += buildNode(val[i], indent + 1);
+      return s + pad + '</array>\n';
     }
     var s2 = pad + '<dict>\n';
     for (var key in val) {
@@ -460,16 +605,13 @@ function log(msg) {
         s2 += buildNode(val[key], indent + 1);
       }
     }
-    s2 += pad + '</dict>\n';
-    return s2;
+    return s2 + pad + '</dict>\n';
   }
 
   function escapeXml(str) {
-    return str.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&apos;');
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
   }
 
   global.plist = { parse: parse, build: build };
@@ -738,11 +880,28 @@ function log(msg) {
         var name = bytesToUtf8(nameBytes);
 
         var dataStart = pos + 30 + nameLen + extraLen;
-        var dataEnd = dataStart + compSize;
-        if (dataEnd > buf.length) {
-          log('Local header data exceeds buffer for ' + name + ', trying to continue');
-          dataEnd = buf.length;
+        var dataEnd;
+
+        if ((flags & 0x08) && compSize === 0) {
+          // Data descriptor record: sizes are 0 in local header; find real end by scanning
+          dataEnd = buf.length; // fallback
+          for (var ds = dataStart; ds <= buf.length - 4; ds++) {
+            if (buf[ds] === 0x50 && buf[ds+1] === 0x4B) {
+              // Optional data-descriptor signature PK\x07\x08
+              if (buf[ds+2] === 0x07 && buf[ds+3] === 0x08) { dataEnd = ds; break; }
+              // Next local-file-header signature PK\x03\x04 (must be past a min offset)
+              if (ds > dataStart + 4 && buf[ds+2] === 0x03 && buf[ds+3] === 0x04) { dataEnd = ds; break; }
+            }
+          }
           compSize = dataEnd - dataStart;
+          log('Data descriptor entry: ' + name + ', inferred compSize=' + compSize);
+        } else {
+          dataEnd = dataStart + compSize;
+          if (dataEnd > buf.length) {
+            log('Local header data exceeds buffer for ' + name + ', trying to continue');
+            dataEnd = buf.length;
+            compSize = dataEnd - dataStart;
+          }
         }
 
         var compressedData = buf.slice(dataStart, dataEnd);
@@ -765,7 +924,13 @@ function log(msg) {
         files[name] = new ZipEntry(name, uncompressedData, { binary: true });
         log('Scanned: ' + name + ' (' + uncompressedData.length + ' bytes)');
 
+        // Advance past an optional data descriptor (PK\x07\x08 + crc + compSize + uncompSize)
         pos = dataEnd;
+        if (pos + 4 <= buf.length &&
+            buf[pos] === 0x50 && buf[pos+1] === 0x4B &&
+            buf[pos+2] === 0x07 && buf[pos+3] === 0x08) {
+          pos += 16; // sig(4) + crc(4) + compressedSize(4) + uncompressedSize(4)
+        }
       } else {
         pos++;
       }
@@ -1143,7 +1308,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     showLoader(true, 'Restoring original…');
     try {
-      var orig = plist.parse(new TextDecoder().decode(State.originalPlistBuf));
+      var orig = plist.parse(new Uint8Array(State.originalPlistBuf));
       State.plist = orig;
       inpBundleId.value = orig.CFBundleIdentifier || '';
       inpName.value     = orig.CFBundleName || '';
@@ -1270,10 +1435,8 @@ document.addEventListener('DOMContentLoaded', function(){
       var plistBuf = await zf.async('arraybuffer');
       log('Plist buffer: ' + plistBuf.byteLength + ' bytes');
 
-      var plistText = new TextDecoder().decode(plistBuf);
-      log('Plist text length: ' + plistText.length);
-
-      var plistObj = plist.parse(plistText);
+      log('Plist buffer size: ' + plistBuf.byteLength + ' bytes');
+      var plistObj = plist.parse(new Uint8Array(plistBuf));
       log('Plist parsed successfully');
       log('Keys: ' + Object.keys(plistObj).join(', '));
 
