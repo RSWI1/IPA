@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <!-- FAVICON -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/RSWI1/RSView@main/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/RSWI1/RSView@main/android-chrome-180x180.png">
+    
   <title>EditIPA · Offline IPA Editor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -217,7 +221,161 @@
       .icon-layout { flex-direction: column; align-items: flex-start; }
       .footer { flex-direction: column; gap: 0.4rem; align-items: flex-start; }
     }
-  </style>
+  
+    /* FILE TREE */
+    .file-tree { max-height: 280px; overflow-y: auto; font-size: 0.72rem; line-height: 1.6; }
+    .file-tree::-webkit-scrollbar { width: 3px; }
+    .file-tree::-webkit-scrollbar-thumb { background: rgba(0,255,127,0.18); border-radius: 2px; }
+    .ft-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.15rem 0; cursor: pointer; }
+    .ft-item:hover { background: rgba(0,255,127,0.04); }
+    .ft-icon { width: 14px; text-align: center; color: var(--text-dim); flex-shrink: 0; }
+    .ft-name { color: var(--text-mid); }
+    .ft-size { margin-left: auto; color: var(--text-dim); font-size: 0.62rem; }
+    .ft-folder { color: var(--accent); font-weight: 600; }
+    .ft-indent { display: inline-block; width: 1.1rem; }
+
+    /* ENTITLEMENTS */
+    .ent-list { display: flex; flex-direction: column; gap: 0.35rem; }
+    .ent-row { display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.7rem; background: var(--surface3); border-radius: 3px; font-size: 0.7rem; }
+    .ent-key { color: var(--text-mid); }
+    .ent-val { color: var(--accent); font-weight: 600; }
+    .ent-val.false { color: var(--red); }
+
+    /* ARCH BADGES */
+    .arch-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .arch-badge {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.25rem 0.6rem; border-radius: 2px; border: 1px solid;
+    }
+    .arch-arm64 { color: var(--accent); border-color: rgba(0,255,127,0.3); background: rgba(0,255,127,0.06); }
+    .arch-arm64e { color: #ffd700; border-color: rgba(255,215,0,0.3); background: rgba(255,215,0,0.06); }
+    .arch-armv7 { color: var(--blue); border-color: rgba(90,171,255,0.3); background: rgba(90,171,255,0.06); }
+    .arch-x86 { color: var(--text-mid); border-color: rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
+
+    /* URL SCHEMES */
+    .url-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .url-item { display: flex; gap: 0.4rem; align-items: center; }
+    .url-item input { flex: 1; }
+    .url-item .btn-icon {
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      background: var(--surface3); border: 1px solid var(--border); border-radius: 3px;
+      color: var(--red); font-size: 0.9rem; cursor: pointer; flex-shrink: 0;
+    }
+    .url-item .btn-icon:hover { border-color: var(--red); background: rgba(255,77,106,0.08); }
+    .btn-add {
+      align-self: flex-start; background: transparent; border: 1px dashed rgba(0,255,127,0.25);
+      color: var(--accent); font-family: var(--mono); font-size: 0.62rem; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase; padding: 0.35rem 0.9rem;
+      border-radius: 3px; cursor: pointer; margin-top: 0.3rem;
+    }
+    .btn-add:hover { background: var(--accent-dim); border-style: solid; }
+
+    /* BACKGROUND MODES */
+    .bgm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; }
+    .bgm-item {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.35rem 0.55rem; background: var(--surface3); border-radius: 3px;
+      font-size: 0.68rem; color: var(--text-mid); cursor: pointer; transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .bgm-item:hover { border-color: rgba(0,255,127,0.15); }
+    .bgm-item input { accent-color: var(--accent); cursor: pointer; }
+    .bgm-item label { cursor: pointer; flex: 1; }
+
+    /* PRIVACY KEYS */
+    .priv-grid { display: grid; grid-template-columns: 1fr; gap: 0.5rem; }
+    .priv-row { display: flex; flex-direction: column; gap: 0.25rem; }
+    .priv-row label { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+    .priv-row input { font-size: 0.72rem; }
+
+    /* INFO BAR */
+    .info-bar {
+      display: flex; gap: 1.2rem; flex-wrap: wrap; padding: 0.6rem 1rem;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 4px;
+      font-size: 0.68rem; color: var(--text-mid); margin-bottom: 1.1rem;
+    }
+    .info-bar span { color: var(--text); font-weight: 600; }
+    .info-bar .sep { color: var(--text-dim); }
+
+    /* STRIP SIGNATURE */
+    .strip-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.6rem 0.85rem; background: rgba(255,77,106,0.04);
+      border: 1px solid rgba(255,77,106,0.15); border-radius: 4px;
+    }
+    .strip-row input { accent-color: var(--red); }
+    .strip-row label { font-size: 0.72rem; color: var(--text-mid); cursor: pointer; }
+    .strip-row label strong { color: var(--red); }
+
+    /* SCROLLABLE PANEL BODY */
+    .panel-body.scroll { max-height: 320px; overflow-y: auto; }
+    .panel-body.scroll::-webkit-scrollbar { width: 4px; }
+    .panel-body.scroll::-webkit-scrollbar-thumb { background: rgba(0,255,127,0.15); border-radius: 2px; }
+
+    @media (max-width: 620px) {
+      .bgm-grid { grid-template-columns: 1fr; }
+      .info-bar { gap: 0.6rem; }
+    }
+
+    /* PROVISIONING PROFILE */
+    .prov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .prov-item { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.4rem 0.6rem; background: var(--surface3); border-radius: 3px; }
+    .prov-label { font-size: 0.55rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+    .prov-val { font-size: 0.72rem; color: var(--text); font-weight: 500; word-break: break-all; }
+    .prov-val.expired { color: var(--red); }
+    .prov-val.valid { color: var(--accent); }
+
+    /* ORIENTATIONS */
+    .ori-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; }
+    .ori-item { display: flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.55rem; background: var(--surface3); border-radius: 3px; font-size: 0.68rem; color: var(--text-mid); cursor: pointer; }
+    .ori-item input { accent-color: var(--accent); cursor: pointer; }
+    .ori-item label { cursor: pointer; flex: 1; }
+
+    /* ATS (App Transport Security) */
+    .ats-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.7rem; background: var(--surface3); border-radius: 3px; cursor: pointer; transition: border-color 0.2s; border: 1px solid transparent; }
+    .ats-row:hover { border-color: rgba(0,255,127,0.15); }
+    .ats-row input { accent-color: var(--accent); cursor: pointer; }
+    .ats-row label { font-size: 0.72rem; color: var(--text-mid); cursor: pointer; flex: 1; }
+    .ats-row label strong { color: var(--text); font-weight: 600; }
+
+    /* DEVICE CAPABILITIES */
+    .cap-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.35rem; }
+    .cap-item { display: flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.5rem; background: var(--surface3); border-radius: 3px; font-size: 0.64rem; color: var(--text-mid); cursor: pointer; }
+    .cap-item input { accent-color: var(--accent); cursor: pointer; width: 13px; height: 13px; }
+    .cap-item label { cursor: pointer; flex: 1; }
+
+    /* FILE TREE SEARCH */
+    .ft-search {
+      background: var(--surface3); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 4px; padding: 0.45rem 0.7rem; color: var(--text);
+      font-family: var(--mono); font-size: 0.72rem; width: 100%; margin-bottom: 0.6rem;
+    }
+    .ft-search:focus { outline: none; border-color: rgba(0,255,127,0.32); box-shadow: 0 0 0 3px rgba(0,255,127,0.065); }
+    .ft-search::placeholder { color: var(--text-dim); font-style: italic; }
+
+    /* EXPORT BUTTONS */
+    .export-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+    .btn-sm {
+      font-family: var(--mono); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 0.4rem 0.9rem; border-radius: 3px; cursor: pointer; border: 1px solid var(--border-mid);
+      background: transparent; color: var(--text-mid); display: inline-flex; align-items: center; gap: 0.35rem; transition: all 0.2s;
+    }
+    .btn-sm:hover { border-color: rgba(255,255,255,0.17); color: var(--text); }
+
+    /* ENCRYPTION BADGE */
+    .enc-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.25rem 0.7rem; border-radius: 2px; border: 1px solid;
+    }
+    .enc-encrypted { color: var(--red); border-color: rgba(255,77,106,0.3); background: rgba(255,77,106,0.06); }
+    .enc-clear { color: var(--accent); border-color: rgba(0,255,127,0.3); background: rgba(0,255,127,0.06); }
+
+    @media (max-width: 620px) {
+      .prov-grid { grid-template-columns: 1fr; }
+      .cap-grid { grid-template-columns: 1fr 1fr; }
+    }
+</style>
 </head>
 <body>
 
@@ -335,6 +493,159 @@
       <div id="debugLog" class="hidden"></div>
     </div>
 
+
+    <!-- INFO BAR -->
+    <div id="infoBar" class="info-bar hidden">
+      <div>Files: <span id="infoFileCount">0</span></div><div class="sep">|</div>
+      <div>Size: <span id="infoSize">0 MB</span></div><div class="sep">|</div>
+      <div>Archs: <span id="infoArchs">—</span></div><div class="sep">|</div>
+      <div>Plist: <span id="infoPlistType">—</span></div>
+    </div>
+
+    <!-- FILE TREE -->
+    <div class="panel" id="fileTreePanel" style="display:none;">
+      <div class="panel-head"><div class="ph-dot dim"></div><span class="panel-label">IPA Contents</span></div>
+      <div class="panel-body scroll"><div id="fileTree" class="file-tree"></div></div>
+    </div>
+
+    <!-- ENTITLEMENTS -->
+    <div class="panel" id="entitlementsPanel" style="display:none;">
+      <div class="panel-head"><div class="ph-dot dim"></div><span class="panel-label">Entitlements</span></div>
+      <div class="panel-body scroll"><div id="entitlementsList" class="ent-list"></div></div>
+    </div>
+
+    <!-- ADVANCED PLIST -->
+    <div class="panel">
+      <div class="panel-head"><div class="ph-dot"></div><span class="panel-label">Advanced Info.plist</span></div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="fgroup full">
+            <label>Bundle Executable</label>
+            <input type="text" id="bundleExecutable" class="form-control" placeholder="AppName">
+          </div>
+          <div class="fgroup full">
+            <label>URL Schemes (CFBundleURLSchemes)</label>
+            <div id="urlSchemesList" class="url-list"></div>
+            <button type="button" id="addUrlSchemeBtn" class="btn-add">+ Add URL Scheme</button>
+          </div>
+          <div class="fgroup full">
+            <label>Background Modes (UIBackgroundModes)</label>
+            <div class="bgm-grid" id="bgModesGrid">
+              <div class="bgm-item"><input type="checkbox" id="bgm_audio" value="audio"><label for="bgm_audio">Audio</label></div>
+              <div class="bgm-item"><input type="checkbox" id="bgm_location" value="location"><label for="bgm_location">Location</label></div>
+              <div class="bgm-item"><input type="checkbox" id="bgm_voip" value="voip"><label for="bgm_voip">VoIP</label></div>
+              <div class="bgm-item"><input type="checkbox" id="bgm_fetch" value="fetch"><label for="bgm_fetch">Fetch</label></div>
+              <div class="bgm-item"><input type="checkbox" id="bgm_remote" value="remote-notification"><label for="bgm_remote">Remote Notification</label></div>
+              <div class="bgm-item"><input type="checkbox" id="bgm_bt" value="bluetooth-central"><label for="bgm_bt">Bluetooth Central</label></div>
+              <div class="bgm-item"><input type="checkbox" id="bgm_btper" value="bluetooth-peripheral"><label for="bgm_btper">Bluetooth Peripheral</label></div>
+              <div class="bgm-item"><input type="checkbox" id="bgm_processing" value="processing"><label for="bgm_processing">Processing</label></div>
+            </div>
+          </div>
+          <div class="fgroup full">
+            <label>Privacy Descriptions</label>
+            <div class="priv-grid">
+              <div class="priv-row"><label>Camera Usage (NSCameraUsageDescription)</label><input type="text" id="privCamera" class="form-control" placeholder="This app needs camera access..."></div>
+              <div class="priv-row"><label>Photo Library (NSPhotoLibraryUsageDescription)</label><input type="text" id="privPhoto" class="form-control" placeholder="This app needs photo access..."></div>
+              <div class="priv-row"><label>Microphone (NSMicrophoneUsageDescription)</label><input type="text" id="privMic" class="form-control" placeholder="This app needs microphone access..."></div>
+              <div class="priv-row"><label>Location (NSLocationWhenInUseUsageDescription)</label><input type="text" id="privLocation" class="form-control" placeholder="This app needs location access..."></div>
+            </div>
+          </div>
+          <div class="fgroup full">
+            <div class="strip-row" onclick="document.getElementById('stripSignature').click()">
+              <input type="checkbox" id="stripSignature" onclick="event.stopPropagation()">
+              <label onclick="event.preventDefault()"><strong>Strip Code Signature</strong> — Remove _CodeSignature folder (required for some sideloaders)</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ICON VARIANTS -->
+    <div class="panel" id="iconVariantsPanel" style="display:none;">
+      <div class="panel-head"><div class="ph-dot dim"></div><span class="panel-label">Icon Variants</span></div>
+      <div class="panel-body">
+        <div id="iconVariantsList" style="display:flex;flex-wrap:wrap;gap:0.6rem;"></div>
+        <p style="font-size:0.65rem;color:var(--text-dim);margin-top:0.6rem;">Replacing the main icon above will automatically resize for all variants on Build.</p>
+      </div>
+    </div>
+
+    <!-- PROVISIONING PROFILE -->
+    <div class="panel" id="provProfilePanel" style="display:none;">
+      <div class="panel-head"><div class="ph-dot dim"></div><span class="panel-label">Provisioning Profile</span></div>
+      <div class="panel-body">
+        <div class="prov-grid" id="provGrid">
+          <div class="prov-item"><div class="prov-label">Team ID</div><div class="prov-val" id="provTeamId">—</div></div>
+          <div class="prov-item"><div class="prov-label">App ID</div><div class="prov-val" id="provAppId">—</div></div>
+          <div class="prov-item"><div class="prov-label">Name</div><div class="prov-val" id="provName">—</div></div>
+          <div class="prov-item"><div class="prov-label">Type</div><div class="prov-val" id="provType">—</div></div>
+          <div class="prov-item"><div class="prov-label">Created</div><div class="prov-val" id="provCreated">—</div></div>
+          <div class="prov-item"><div class="prov-label">Expires</div><div class="prov-val" id="provExpires">—</div></div>
+        </div>
+        <div style="margin-top:0.6rem;display:flex;gap:0.4rem;flex-wrap:wrap;">
+          <span class="enc-badge" id="encBadge" style="display:none;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPORT ACTIONS -->
+    <div class="panel">
+      <div class="panel-head"><div class="ph-dot dim"></div><span class="panel-label">Export</span></div>
+      <div class="panel-body">
+        <div class="export-row">
+          <button type="button" id="exportPlistBtn" class="btn-sm">📄 Export Info.plist</button>
+          <button type="button" id="exportEntitlementsBtn" class="btn-sm">🔐 Export Entitlements</button>
+          <button type="button" id="exportMobileProvBtn" class="btn-sm">📋 Export .mobileprovision</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPORTED ORIENTATIONS -->
+    <div class="panel">
+      <div class="panel-head"><div class="ph-dot"></div><span class="panel-label">Supported Orientations</span></div>
+      <div class="panel-body">
+        <div class="ori-grid" id="oriGrid">
+          <div class="ori-item"><input type="checkbox" id="ori_portrait" value="UIInterfaceOrientationPortrait"><label for="ori_portrait">Portrait</label></div>
+          <div class="ori-item"><input type="checkbox" id="ori_portraitUpsideDown" value="UIInterfaceOrientationPortraitUpsideDown"><label for="ori_portraitUpsideDown">Portrait Upside-Down</label></div>
+          <div class="ori-item"><input type="checkbox" id="ori_landscapeLeft" value="UIInterfaceOrientationLandscapeLeft"><label for="ori_landscapeLeft">Landscape Left</label></div>
+          <div class="ori-item"><input type="checkbox" id="ori_landscapeRight" value="UIInterfaceOrientationLandscapeRight"><label for="ori_landscapeRight">Landscape Right</label></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP TRANSPORT SECURITY -->
+    <div class="panel">
+      <div class="panel-head"><div class="ph-dot"></div><span class="panel-label">App Transport Security</span></div>
+      <div class="panel-body">
+        <div class="ats-row" onclick="document.getElementById('atsArbitrary').click()">
+          <input type="checkbox" id="atsArbitrary" onclick="event.stopPropagation()">
+          <label onclick="event.preventDefault()"><strong>Allow Arbitrary Loads</strong> — NSAllowsArbitraryLoads (disables ATS globally)</label>
+        </div>
+        <div style="margin-top:0.5rem;font-size:0.62rem;color:var(--text-dim);line-height:1.6;">
+          ⚠️ Apple rejects apps with this enabled unless justified. Use only for development/debugging.
+        </div>
+      </div>
+    </div>
+
+    <!-- REQUIRED DEVICE CAPABILITIES -->
+    <div class="panel">
+      <div class="panel-head"><div class="ph-dot"></div><span class="panel-label">Required Device Capabilities</span></div>
+      <div class="panel-body">
+        <div class="cap-grid" id="capGrid">
+          <div class="cap-item"><input type="checkbox" id="cap_arm64" value="arm64"><label for="cap_arm64">arm64</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_telephony" value="telephony"><label for="cap_telephony">Telephony</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_wifi" value="wifi"><label for="cap_wifi">WiFi</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_camera" value="still-camera"><label for="cap_camera">Camera</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_video" value="video-camera"><label for="cap_video">Video Camera</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_autofocus" value="auto-focus-camera"><label for="cap_autofocus">Auto Focus</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_flash" value="camera-flash"><label for="cap_flash">Flash</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_gps" value="gps"><label for="cap_gps">GPS</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_magnetometer" value="magnetometer"><label for="cap_magnetometer">Magnetometer</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_gyro" value="gyroscope"><label for="cap_gyro">Gyroscope</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_accel" value="accelerometer"><label for="cap_accel">Accelerometer</label></div>
+          <div class="cap-item"><input type="checkbox" id="cap_gamekit" value="gamekit"><label for="cap_gamekit">GameKit</label></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <footer class="footer">
@@ -359,157 +670,201 @@ function log(msg) {
 }
 
 /* ============================================================
-   EMBEDDED PLIST LIBRARY  (XML + binary bplist00)
+   BINARY PLIST PARSER (bplist00) — fixed
    ============================================================ */
 (function(global) {
   'use strict';
 
-  /* ---------- shared helpers ---------- */
-  function readUintBE(buf, offset, size) {
-    var v = 0;
-    for (var i = 0; i < size; i++) v = (v * 256 + buf[offset + i]) >>> 0;
-    return v;
-  }
-  function readUint64BE(buf, offset) {
-    var hi = readUintBE(buf, offset, 4);
-    var lo = readUintBE(buf, offset + 4, 4);
-    return hi * 0x100000000 + lo; // safe for sizes < 2^53
-  }
-
-  /* ---------- binary plist parser (bplist00) ---------- */
-  function parseBinary(buf) {
+  function parseBplist(buf) {
     if (!(buf instanceof Uint8Array)) buf = new Uint8Array(buf);
-    if (buf.length < 40) throw new Error('bplist too short: ' + buf.length);
-    // Trailer: last 32 bytes
+    // Magic: "bplist00" = 62 70 6C 69 73 74 30 30
+    if (buf.length < 40 ||
+        buf[0] !== 0x62 || buf[1] !== 0x70 || buf[2] !== 0x6C || buf[3] !== 0x69 ||
+        buf[4] !== 0x73 || buf[5] !== 0x74 || buf[6] !== 0x30 || buf[7] !== 0x30) {
+      return null; // not bplist00
+    }
+
+    var view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+
+    // Trailer layout (last 32 bytes):
+    //   +0..+4  : 5 unused padding bytes
+    //   +5      : sortVersion
+    //   +6      : offsetIntSize   ← was wrongly read from +1
+    //   +7      : objectRefSize   ← was wrongly read from +2
+    //   +8..+15 : numObjects  (uint64 BE)
+    //   +16..+23: topObject   (uint64 BE)
+    //   +24..+31: offsetTableOffset (uint64 BE)
     var t = buf.length - 32;
-    var offsetIntSize = buf[t + 6];
-    var objRefSize    = buf[t + 7];
-    var numObjects    = readUint64BE(buf, t + 8);
-    var topObject     = readUint64BE(buf, t + 16);
-    var offTableOff   = readUint64BE(buf, t + 24);
+    var offsetIntSize = view.getUint8(t + 6);
+    var objectRefSize = view.getUint8(t + 7);
+    var numObjects    = readUint64(t + 8);
+    var topObject     = readUint64(t + 16);
+    var offTableOff   = readUint64(t + 24);
+
     if (offsetIntSize < 1 || offsetIntSize > 8) throw new Error('Bad bplist offsetIntSize: ' + offsetIntSize);
-    if (objRefSize    < 1 || objRefSize    > 8) throw new Error('Bad bplist objRefSize: '    + objRefSize);
-    // Build offset table
-    var offsets = new Array(numObjects);
-    for (var i = 0; i < numObjects; i++)
-      offsets[i] = readUintBE(buf, offTableOff + i * offsetIntSize, offsetIntSize);
+    if (objectRefSize < 1 || objectRefSize > 8) throw new Error('Bad bplist objectRefSize: ' + objectRefSize);
+
+    function readUint64(off) {
+      var hi = view.getUint32(off, false);
+      var lo = view.getUint32(off + 4, false);
+      return hi * 0x100000000 + lo; // safe for JS (< 2^53 for any real IPA)
+    }
+    function readSizedUint(off, size) {
+      var val = 0;
+      for (var i = 0; i < size; i++) val = val * 256 + view.getUint8(off + i);
+      return val;
+    }
+    function readOffset(idx) { return readSizedUint(offTableOff + idx * offsetIntSize, offsetIntSize); }
+    function readObjRef(off) { return readSizedUint(off, objectRefSize); }
+
+    // When info nibble === 15, the count follows as an embedded int.
+    // The embedded int's marker byte is at `markerOff`; its info nibble is the EXPONENT:
+    //   byte_count = 1 << (marker & 0x0F)     ← was wrongly using (marker & 0x0F) directly
+    // Returns { count, skip } where skip = bytes consumed (1 marker + byte_count data).
+    function varCount(markerOff) {
+      var intMarker = view.getUint8(markerOff);
+      var byteCount = 1 << (intMarker & 0x0F);          // FIX: exponent, not raw nibble
+      var count = readSizedUint(markerOff + 1, byteCount);
+      return { count: count, skip: 1 + byteCount };
+    }
+
+    var cache = new Array(numObjects);
 
     function parseObject(idx) {
-      if (idx >= numObjects) throw new Error('bplist obj idx OOB: ' + idx);
-      var pos    = offsets[idx];
-      var marker = buf[pos++];
+      if (cache[idx] !== undefined) return cache[idx];
+      var off    = readOffset(idx);
+      var marker = view.getUint8(off);
       var type   = (marker >> 4) & 0xF;
       var info   = marker & 0xF;
 
-      // For arrays/dicts/strings/data: count may follow if info nibble === 15
-      function readCount() {
-        if (info !== 15) return info;
-        var intMarker = buf[pos++];
-        var intType   = (intMarker >> 4) & 0xF;
-        if (intType !== 1) throw new Error('bplist expected int for count, got type 0x' + intType.toString(16));
-        var bytes = 1 << (intMarker & 0xF);
-        var n = 0;
-        for (var k = 0; k < bytes; k++) n = n * 256 + buf[pos++];
-        return n;
+      // Resolve count + data start offset
+      var count, dataOff;
+      if (info === 0x0F) {
+        var vc  = varCount(off + 1);
+        count   = vc.count;
+        dataOff = off + 1 + vc.skip;
+      } else {
+        count   = info;
+        dataOff = off + 1;
       }
 
+      var val;
       switch (type) {
         case 0x0: // singleton
-          if (info === 8) return false;
-          if (info === 9) return true;
-          return null;
+          val = (info === 8) ? false : (info === 9) ? true : null;
+          break;
 
-        case 0x1: { // integer
+        case 0x1: { // integer (2^info bytes, big-endian)
           var bytes = 1 << info;
           if (bytes <= 4) {
-            var v = 0;
-            for (var k = 0; k < bytes; k++) v = v * 256 + buf[pos + k];
-            if (bytes === 4 && v >= 0x80000000) v -= 0x100000000;
-            return v;
+            val = readSizedUint(dataOff, bytes);
+            if (bytes === 4 && val >= 0x80000000) val -= 0x100000000;
+          } else {
+            var hi = view.getUint32(dataOff, false), lo = view.getUint32(dataOff + 4, false);
+            val = (hi >= 0x80000000)
+              ? -(0x100000000 * (0xFFFFFFFF - hi) + (0xFFFFFFFF - lo) + 1)
+              : hi * 0x100000000 + lo;
           }
-          // 8-byte int
-          var hi = readUintBE(buf, pos, 4), lo = readUintBE(buf, pos + 4, 4);
-          return (hi >= 0x80000000)
-            ? -(0x100000000 * (0xFFFFFFFF - hi) + (0xFFFFFFFF - lo) + 1)
-            : hi * 0x100000000 + lo;
+          break;
         }
 
-        case 0x2: { // real (IEEE 754 big-endian)
-          var dv = new DataView(buf.buffer, buf.byteOffset + pos);
-          if (info === 2) return dv.getFloat32(0, false);
-          if (info === 3) return dv.getFloat64(0, false);
-          return 0;
-        }
+        case 0x2: // real
+          val = (info === 2) ? view.getFloat32(dataOff, false)
+              : (info === 3) ? view.getFloat64(dataOff, false) : 0;
+          break;
 
-        case 0x3: { // date (seconds since 2001-01-01)
-          var dv = new DataView(buf.buffer, buf.byteOffset + pos);
-          return new Date((dv.getFloat64(0, false) + 978307200) * 1000);
-        }
+        case 0x3: // date (seconds since 2001-01-01T00:00:00Z)
+          val = new Date((view.getFloat64(dataOff, false) + 978307200) * 1000);
+          break;
 
-        case 0x4: { // data blob
-          var count = readCount();
-          return buf.slice(pos, pos + count);
-        }
+        case 0x4: // data blob
+          val = buf.slice(dataOff, dataOff + count);
+          break;
 
-        case 0x5: { // ASCII string
-          var count = readCount();
+        case 0x5: { // ASCII string — no external helper needed
           var s = '';
-          for (var k = 0; k < count; k++) s += String.fromCharCode(buf[pos + k]);
-          return s;
+          for (var i = 0; i < count; i++) s += String.fromCharCode(view.getUint8(dataOff + i));
+          val = s;
+          break;
         }
 
         case 0x6: { // UTF-16BE string
-          var count = readCount();
           var s = '';
-          for (var k = 0; k < count; k++)
-            s += String.fromCharCode((buf[pos + k * 2] << 8) | buf[pos + k * 2 + 1]);
-          return s;
+          for (var i = 0; i < count; i++)
+            s += String.fromCharCode((view.getUint8(dataOff + i * 2) << 8) | view.getUint8(dataOff + i * 2 + 1));
+          val = s;
+          break;
         }
 
-        case 0x8: { // UID (treat as integer)
-          return readUintBE(buf, pos, info + 1);
-        }
+        case 0x8: // UID (NSKeyedArchiver)
+          val = { UID: readSizedUint(dataOff, info + 1) };
+          break;
 
         case 0xA: // array
         case 0xC: { // set (treat as array)
-          var count = readCount();
-          var arr = [];
-          for (var k = 0; k < count; k++)
-            arr.push(parseObject(readUintBE(buf, pos + k * objRefSize, objRefSize)));
-          return arr;
+          val = [];
+          for (var i = 0; i < count; i++)
+            val.push(parseObject(readObjRef(dataOff + i * objectRefSize)));
+          break;
         }
 
         case 0xD: { // dict
-          var count = readCount();
-          var obj = {};
-          for (var k = 0; k < count; k++) {
-            var keyRef = readUintBE(buf, pos + k             * objRefSize, objRefSize);
-            var valRef = readUintBE(buf, pos + (count + k)   * objRefSize, objRefSize);
-            obj[String(parseObject(keyRef))] = parseObject(valRef);
+          val = {};
+          for (var i = 0; i < count; i++) {
+            var k = parseObject(readObjRef(dataOff + i             * objectRefSize));
+            var v = parseObject(readObjRef(dataOff + (count + i)   * objectRefSize));
+            val[String(k)] = v;
           }
-          return obj;
+          break;
         }
 
         default:
           log('bplist: unknown type 0x' + type.toString(16) + ' at idx ' + idx);
-          return null;
+          val = null;
       }
+      cache[idx] = val;
+      return val;
     }
+
     return parseObject(topObject);
   }
 
-  /* ---------- XML plist parser ---------- */
-  function parseXml(xml) {
-    log('Parsing XML plist...');
+  global.bplist = { parse: parseBplist };
+})(window);
+
+/* ============================================================
+   EMBEDDED MINIMAL PLIST LIBRARY
+   ============================================================ */
+(function(global) {
+  'use strict';
+
+  function parse(input) {
+    // Try binary plist first
+    if (input instanceof Uint8Array || input instanceof ArrayBuffer) {
+      var bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
+      if (bytes.length > 8 && bytes[0] === 0x62 && bytes[1] === 0x70) {
+        log('Detected binary plist, parsing...');
+        try {
+          var result = window.bplist.parse(bytes);
+          log('Binary plist parsed successfully');
+          return result;
+        } catch(e) {
+          log('Binary plist parse failed: ' + e.message + ', falling back to XML');
+        }
+      }
+      // Convert to string for XML parsing
+      input = new TextDecoder().decode(bytes);
+    }
+    log('Parsing plist XML...');
     var parser = new DOMParser();
-    var doc = parser.parseFromString(xml, 'application/xml');
+    var doc = parser.parseFromString(input, 'application/xml');
     var parserError = doc.querySelector('parsererror');
     if (parserError) {
       throw new Error('XML parse error: ' + parserError.textContent.substring(0, 100));
     }
-    var plistEl = doc.querySelector('plist');
-    if (!plistEl) throw new Error('No <plist> root element found');
-    var root = plistEl.querySelector('dict, array, string, integer, real, true, false, date, data');
+    var plist = doc.querySelector('plist');
+    if (!plist) throw new Error('No <plist> root element found');
+    var root = plist.querySelector('dict, array, string, integer, real, true, false, date, data');
     if (!root) throw new Error('No plist content found inside <plist>');
     return parseNode(root);
   }
@@ -517,56 +872,41 @@ function log(msg) {
   function parseNode(node) {
     var tag = node.tagName.toLowerCase();
     switch(tag) {
-      case 'dict': {
+      case 'dict':
         var obj = {};
-        var children = node.children, i = 0;
+        var children = node.children;
+        var i = 0;
         while (i < children.length) {
           if (children[i].tagName.toLowerCase() === 'key') {
-            var keyName = children[i].textContent; i++;
-            if (i < children.length) { obj[keyName] = parseNode(children[i]); i++; }
-          } else { i++; }
+            var keyName = children[i].textContent;
+            i++;
+            if (i < children.length) {
+              obj[keyName] = parseNode(children[i]);
+              i++;
+            }
+          } else {
+            i++;
+          }
         }
         return obj;
-      }
-      case 'array': {
+      case 'array':
         var arr = [];
-        for (var j = 0; j < node.children.length; j++) arr.push(parseNode(node.children[j]));
+        var arrChildren = node.children;
+        for (var j = 0; j < arrChildren.length; j++) {
+          arr.push(parseNode(arrChildren[j]));
+        }
         return arr;
-      }
-      case 'string':  return node.textContent || '';
+      case 'string': return node.textContent || '';
       case 'integer': return parseInt(node.textContent || '0', 10);
-      case 'real':    return parseFloat(node.textContent || '0');
-      case 'true':    return true;
-      case 'false':   return false;
-      case 'date':    return new Date(node.textContent);
-      case 'data':    return node.textContent || '';
-      default:        return node.textContent || '';
+      case 'real': return parseFloat(node.textContent || '0');
+      case 'true': return true;
+      case 'false': return false;
+      case 'date': return new Date(node.textContent);
+      case 'data': return node.textContent || '';
+      default: return node.textContent || '';
     }
   }
 
-  /* ---------- unified parse: accepts Uint8Array, ArrayBuffer, or string ---------- */
-  function parse(input) {
-    var buf;
-    if (typeof input === 'string') {
-      return parseXml(input);
-    }
-    if (input instanceof ArrayBuffer) buf = new Uint8Array(input);
-    else if (input instanceof Uint8Array) buf = input;
-    else throw new Error('plist.parse: unsupported input type');
-
-    // Detect binary plist magic: "bplist00"
-    if (buf.length >= 8 &&
-        buf[0] === 0x62 && buf[1] === 0x70 && buf[2] === 0x6C && buf[3] === 0x69 &&
-        buf[4] === 0x73 && buf[5] === 0x74 && buf[6] === 0x30 && buf[7] === 0x30) {
-      log('Detected binary plist (bplist00) — using binary parser');
-      return parseBinary(buf);
-    }
-
-    log('Parsing XML plist from buffer...');
-    return parseXml(new TextDecoder().decode(buf));
-  }
-
-  /* ---------- builder (always writes XML) ---------- */
   function build(obj) {
     var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n';
@@ -579,24 +919,29 @@ function log(msg) {
   function buildNode(val, indent) {
     var pad = '';
     for (var i = 0; i < indent; i++) pad += '  ';
-    if (val === null || val === undefined) return pad + '<string></string>\n';
-    if (typeof val === 'boolean') return pad + (val ? '<true/>' : '<false/>') + '\n';
+    if (val === null || val === undefined) {
+      return pad + '<string></string>\n';
+    }
+    if (typeof val === 'boolean') {
+      return pad + (val ? '<true/>' : '<false/>') + '\n';
+    }
     if (typeof val === 'number') {
       if (Number.isInteger(val)) return pad + '<integer>' + val + '</integer>\n';
       return pad + '<real>' + val + '</real>\n';
     }
-    if (typeof val === 'string') return pad + '<string>' + escapeXml(val) + '</string>\n';
-    if (val instanceof Date) return pad + '<date>' + val.toISOString() + '</date>\n';
-    if (val instanceof Uint8Array) {
-      // Binary data: encode as base64
-      var bin = '';
-      for (var i = 0; i < val.length; i++) bin += String.fromCharCode(val[i]);
-      return pad + '<data>' + btoa(bin) + '</data>\n';
+    if (typeof val === 'string') {
+      return pad + '<string>' + escapeXml(val) + '</string>\n';
+    }
+    if (val instanceof Date) {
+      return pad + '<date>' + val.toISOString() + '</date>\n';
     }
     if (Array.isArray(val)) {
       var s = pad + '<array>\n';
-      for (var i = 0; i < val.length; i++) s += buildNode(val[i], indent + 1);
-      return s + pad + '</array>\n';
+      for (var i = 0; i < val.length; i++) {
+        s += buildNode(val[i], indent + 1);
+      }
+      s += pad + '</array>\n';
+      return s;
     }
     var s2 = pad + '<dict>\n';
     for (var key in val) {
@@ -605,174 +950,56 @@ function log(msg) {
         s2 += buildNode(val[key], indent + 1);
       }
     }
-    return s2 + pad + '</dict>\n';
+    s2 += pad + '</dict>\n';
+    return s2;
   }
 
   function escapeXml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    return str.replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&apos;');
   }
 
   global.plist = { parse: parse, build: build };
 })(window);
 
 /* ============================================================
-   EMBEDDED ROBUST JSZIP
+   MINIMAL JSZIP — uses native DecompressionStream/CompressionStream
    ============================================================ */
 (function(global) {
   'use strict';
 
-  // CRC32
-  var CRC_TABLE = new Uint32Array(256);
-  for (var i = 0; i < 256; i++) {
-    var c = i;
-    for (var j = 0; j < 8; j++) {
-      c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
-    }
-    CRC_TABLE[i] = c >>> 0;
+  function readUint32LE(buf, off) {
+    return (buf[off] | (buf[off+1] << 8) | (buf[off+2] << 16) | (buf[off+3] << 24)) >>> 0;
+  }
+  function readUint16LE(buf, off) {
+    return (buf[off] | (buf[off+1] << 8)) >>> 0;
+  }
+  function writeUint32LE(buf, off, val) {
+    buf[off] = val & 0xFF; buf[off+1] = (val >>> 8) & 0xFF;
+    buf[off+2] = (val >>> 16) & 0xFF; buf[off+3] = (val >>> 24) & 0xFF;
+  }
+  function writeUint16LE(buf, off, val) {
+    buf[off] = val & 0xFF; buf[off+1] = (val >>> 8) & 0xFF;
   }
 
   function crc32(data, crc) {
     crc = (crc === undefined) ? 0xFFFFFFFF : (crc ^ 0xFFFFFFFF);
-    for (var i = 0; i < data.length; i++) {
-      crc = CRC_TABLE[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
+    var t = new Uint32Array(256);
+    for (var i = 0; i < 256; i++) {
+      var c = i;
+      for (var j = 0; j < 8; j++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[i] = c >>> 0;
     }
+    for (var i = 0; i < data.length; i++) crc = t[(crc ^ data[i]) & 0xFF] ^ (crc >>> 8);
     return (crc ^ 0xFFFFFFFF) >>> 0;
   }
 
-  // Adler32
-  function adler32(data) {
-    var a = 1, b = 0;
-    for (var i = 0; i < data.length; i++) {
-      a = (a + data[i]) % 65521;
-      b = (b + a) % 65521;
-    }
-    return ((b << 16) | a) >>> 0;
-  }
-
-  // Raw deflate using stored blocks only (most reliable)
-  function deflateRaw(data) {
-    var maxBlock = 65535;
-    var blocks = Math.ceil(data.length / maxBlock);
-    var out = [];
-    for (var b = 0; b < blocks; b++) {
-      var start = b * maxBlock;
-      var len = Math.min(maxBlock, data.length - start);
-      var isLast = (b === blocks - 1) ? 1 : 0;
-      out.push(isLast); // BFINAL
-      out.push(0); out.push(0); // BTYPE = stored
-      out.push(len & 0xFF); out.push((len >>> 8) & 0xFF);
-      out.push((~len) & 0xFF); out.push(((~len) >>> 8) & 0xFF);
-      for (var k = 0; k < len; k++) out.push(data[start + k]);
-    }
-    return new Uint8Array(out);
-  }
-
-  // Async raw inflate using browser-native DecompressionStream (handles all deflate block types)
-  async function inflateRawAsync(data) {
-    var ds = new DecompressionStream('deflate-raw');
-    var writer = ds.writable.getWriter();
-    var reader = ds.readable.getReader();
-    writer.write(data instanceof Uint8Array ? data : new Uint8Array(data));
-    writer.close();
-    var chunks = [];
-    var totalSize = 0;
-    while (true) {
-      var result = await reader.read();
-      if (result.done) break;
-      chunks.push(result.value);
-      totalSize += result.value.length;
-    }
-    var out = new Uint8Array(totalSize);
-    var offset = 0;
-    for (var c = 0; c < chunks.length; c++) { out.set(chunks[c], offset); offset += chunks[c].length; }
-    return out;
-  }
-
-  // Raw inflate (RFC 1951) - handles stored blocks
-  function inflateRaw(data) {
-    var out = [];
-    var i = 0;
-    while (i < data.length) {
-      var bfinal = data[i] & 1;
-      var btype = (data[i] >>> 1) & 3;
-      i++;
-      if (btype === 0) {
-        // stored - skip to byte boundary
-        while ((i * 8) % 8 !== 0) {
-          // Actually: stored blocks don't need bit alignment in raw deflate
-          // The header was already byte-aligned
-        }
-        if (i + 4 > data.length) throw new Error('Stored block header truncated');
-        var len = data[i] | (data[i+1] << 8);
-        var nlen = data[i+2] | (data[i+3] << 8);
-        i += 4;
-        if ((len ^ nlen) !== 0xFFFF) throw new Error('Invalid stored block: len=' + len + ' nlen=' + nlen);
-        if (i + len > data.length) throw new Error('Stored block data truncated: need ' + len + ' have ' + (data.length - i));
-        for (var k = 0; k < len; k++) {
-          out.push(data[i++]);
-        }
-      } else if (btype === 3) {
-        throw new Error('Invalid block type (3)');
-      } else {
-        throw new Error('Dynamic/fixed Huffman blocks not supported (type=' + btype + ')');
-      }
-      if (bfinal) break;
-    }
-    return new Uint8Array(out);
-  }
-
-  // zlib-wrapped deflate
-  function deflateZlib(data) {
-    var raw = deflateRaw(data);
-    var adler = adler32(data);
-    var out = new Uint8Array(raw.length + 6);
-    out[0] = 0x78; out[1] = 0x9C; // zlib header
-    out.set(raw, 2);
-    out[out.length - 4] = (adler >>> 24) & 0xFF;
-    out[out.length - 3] = (adler >>> 16) & 0xFF;
-    out[out.length - 2] = (adler >>> 8) & 0xFF;
-    out[out.length - 1] = adler & 0xFF;
-    return out;
-  }
-
-  // zlib-wrapped inflate
-  function inflateZlib(data) {
-    if (data.length < 6) throw new Error('Data too short for zlib: ' + data.length);
-    var cmf = data[0];
-    var flg = data[1];
-    if ((cmf & 0x0F) !== 8) throw new Error('Unknown compression method: ' + (cmf & 0x0F));
-    if (((cmf << 8) | flg) % 31 !== 0) {
-      // Some zips have bad headers but valid data, try anyway
-      log('Warning: bad zlib header checksum, attempting inflate anyway');
-    }
-    var raw = inflateRaw(data.slice(2, data.length - 4));
-    return raw;
-  }
-
-  function readUint32LE(data, offset) {
-    return (data[offset] | (data[offset+1] << 8) | (data[offset+2] << 16) | (data[offset+3] << 24)) >>> 0;
-  }
-  function readUint16LE(data, offset) {
-    return (data[offset] | (data[offset+1] << 8)) >>> 0;
-  }
-  function writeUint32LE(data, offset, val) {
-    data[offset] = val & 0xFF;
-    data[offset+1] = (val >>> 8) & 0xFF;
-    data[offset+2] = (val >>> 16) & 0xFF;
-    data[offset+3] = (val >>> 24) & 0xFF;
-  }
-  function writeUint16LE(data, offset, val) {
-    data[offset] = val & 0xFF;
-    data[offset+1] = (val >>> 8) & 0xFF;
-  }
-
   function dosDate(d) {
-    var year = d.getFullYear();
-    if (year < 1980) year = 1980;
-    if (year > 2107) year = 2107;
-    return ((year - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    var y = d.getFullYear(); if (y < 1980) y = 1980; if (y > 2107) y = 2107;
+    return ((y - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
   }
   function dosTime(d) {
     return (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
@@ -786,8 +1013,7 @@ function log(msg) {
       else if (c < 0x800) { bytes.push(0xC0 | (c >> 6), 0x80 | (c & 0x3F)); }
       else if (c < 0xD800 || c >= 0xE000) { bytes.push(0xE0 | (c >> 12), 0x80 | ((c >> 6) & 0x3F), 0x80 | (c & 0x3F)); }
       else {
-        i++;
-        c = 0x10000 + (((c & 0x3FF) << 10) | (str.charCodeAt(i) & 0x3FF));
+        i++; c = 0x10000 + (((c & 0x3FF) << 10) | (str.charCodeAt(i) & 0x3FF));
         bytes.push(0xF0 | (c >> 18), 0x80 | ((c >> 12) & 0x3F), 0x80 | ((c >> 6) & 0x3F), 0x80 | (c & 0x3F));
       }
     }
@@ -799,66 +1025,232 @@ function log(msg) {
     while (i < bytes.length) {
       var c = bytes[i++];
       if (c < 0x80) chars.push(c);
-      else if ((c & 0xE0) === 0xC0) {
-        chars.push(((c & 0x1F) << 6) | (bytes[i++] & 0x3F));
-      } else if ((c & 0xF0) === 0xE0) {
-        chars.push(((c & 0x0F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F));
-      } else {
-        var cp = ((c & 0x07) << 18) | ((bytes[i++] & 0x3F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F);
-        cp -= 0x10000;
-        chars.push(0xD800 + (cp >> 10), 0xDC00 + (cp & 0x3FF));
-      }
+      else if ((c & 0xE0) === 0xC0) chars.push(((c & 0x1F) << 6) | (bytes[i++] & 0x3F));
+      else if ((c & 0xF0) === 0xE0) chars.push(((c & 0x0F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F));
+      else { var cp = ((c & 0x07) << 18) | ((bytes[i++] & 0x3F) << 12) | ((bytes[i++] & 0x3F) << 6) | (bytes[i++] & 0x3F); cp -= 0x10000; chars.push(0xD800 + (cp >> 10), 0xDC00 + (cp & 0x3FF)); }
     }
     return String.fromCharCode.apply(null, chars);
   }
 
-  function ZipFile() {
-    this.files = {};
+  async function inflateRaw(data) {
+    var ds = new DecompressionStream('deflate-raw');
+    var writer = ds.writable.getWriter();
+    var reader = ds.readable.getReader();
+    writer.write(data instanceof Uint8Array ? data : new Uint8Array(data));
+    writer.close();
+    var chunks = [], total = 0;
+    while (true) {
+      var r = await reader.read();
+      if (r.done) break;
+      chunks.push(r.value); total += r.value.length;
+    }
+    var out = new Uint8Array(total), off = 0;
+    for (var i = 0; i < chunks.length; i++) { out.set(chunks[i], off); off += chunks[i].length; }
+    return out;
   }
+
+  async function deflateRaw(data) {
+    var cs = new CompressionStream('deflate-raw');
+    var writer = cs.writable.getWriter();
+    var reader = cs.readable.getReader();
+    writer.write(data);
+    writer.close();
+    var chunks = [], total = 0;
+    while (true) {
+      var r = await reader.read();
+      if (r.done) break;
+      chunks.push(r.value); total += r.value.length;
+    }
+    var out = new Uint8Array(total), off = 0;
+    for (var i = 0; i < chunks.length; i++) { out.set(chunks[i], off); off += chunks[i].length; }
+    return out;
+  }
+
+  function ZipEntry(name, data, opts) {
+    this.name = name;
+    this._data = data;
+    this.opts = opts || {};
+  }
+  ZipEntry.prototype.async = function(type) {
+    var data = this._data;
+    if (type === 'blob') {
+      if (data instanceof Blob) return Promise.resolve(data);
+      if (data instanceof Uint8Array) return Promise.resolve(new Blob([data]));
+      if (data instanceof ArrayBuffer) return Promise.resolve(new Blob([new Uint8Array(data)]));
+      return Promise.resolve(new Blob([String(data)]));
+    }
+    if (type === 'arraybuffer') {
+      if (data instanceof ArrayBuffer) return Promise.resolve(data);
+      if (data instanceof Uint8Array) return Promise.resolve(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+      var b = utf8ToBytes(String(data));
+      return Promise.resolve(b.buffer);
+    }
+    if (type === 'string') {
+      if (typeof data === 'string') return Promise.resolve(data);
+      if (data instanceof Uint8Array) return Promise.resolve(bytesToUtf8(data));
+      return Promise.resolve(String(data));
+    }
+    if (type === 'uint8array') {
+      if (data instanceof Uint8Array) return Promise.resolve(data);
+      if (data instanceof ArrayBuffer) return Promise.resolve(new Uint8Array(data));
+      return Promise.resolve(utf8ToBytes(String(data)));
+    }
+    return Promise.resolve(data);
+  };
+
+  function ZipFile() { this.files = {}; }
 
   ZipFile.prototype.file = function(name, data, opts) {
     if (arguments.length === 1) {
-      var f = this.files[name];
-      if (!f) return null;
-      return {
-        async: function(type) {
-          return Promise.resolve(f._getData(type));
-        }
-      };
+      return this.files[name] || null;
     }
     this.files[name] = new ZipEntry(name, data, opts || {});
     return this;
   };
 
-  function ZipEntry(name, data, opts) {
-    this.name = name;
-    this.data = data;
-    this.opts = opts;
-  }
+  ZipFile.prototype.loadAsync = function(data) {
+    var self = this;
+    return (async function() {
+      var buf = (data instanceof ArrayBuffer) ? new Uint8Array(data) : data;
+      if (!(buf instanceof Uint8Array)) throw new Error('Expected ArrayBuffer or Uint8Array');
+      log('ZIP buffer size: ' + buf.length);
 
-  ZipEntry.prototype._getData = function(type) {
-    var data = this.data;
-    if (type === 'blob') {
-      if (data instanceof Blob) return data;
-      if (data instanceof Uint8Array) return new Blob([data]);
-      if (data instanceof ArrayBuffer) return new Blob([new Uint8Array(data)]);
-      return new Blob([String(data)]);
-    }
-    if (type === 'arraybuffer') {
-      if (data instanceof ArrayBuffer) return data;
-      if (data instanceof Uint8Array) return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-      var b = utf8ToBytes(String(data));
-      return b.buffer;
-    }
-    if (type === 'string') {
-      if (typeof data === 'string') return data;
-      if (data instanceof Uint8Array) return bytesToUtf8(data);
-      return String(data);
-    }
-    return data;
+      // Find EOCD
+      var pos = buf.length - 22, eocdPos = -1;
+      while (pos >= Math.max(0, buf.length - 65557)) {
+        if (buf[pos] === 0x50 && buf[pos+1] === 0x4B && buf[pos+2] === 0x05 && buf[pos+3] === 0x06) {
+          var commentLen = readUint16LE(buf, pos + 20);
+          if (pos + 22 + commentLen === buf.length) { eocdPos = pos; break; }
+        }
+        pos--;
+      }
+
+      if (eocdPos < 0) {
+        log('EOCD not found, scanning local headers...');
+        self.files = await scanLocalHeaders(buf);
+        if (Object.keys(self.files).length === 0) throw new Error('Invalid ZIP: no entries found');
+        log('Local scan found ' + Object.keys(self.files).length + ' files');
+        return self;
+      }
+
+      var cdOffset = readUint32LE(buf, eocdPos + 16);
+      var cdSize = readUint32LE(buf, eocdPos + 12);
+      var numEntries = readUint16LE(buf, eocdPos + 8);
+      log('Entries: ' + numEntries + ', CD offset: ' + cdOffset + ', CD size: ' + cdSize);
+
+      // Zip64 fallback
+      if (cdOffset === 0xFFFFFFFF || cdSize === 0xFFFFFFFF || numEntries === 0xFFFF) {
+        log('Zip64 detected, scanning local headers...');
+        self.files = await scanLocalHeaders(buf);
+        if (Object.keys(self.files).length === 0) throw new Error('Zip64: no entries found');
+        log('Local scan found ' + Object.keys(self.files).length + ' files');
+        return self;
+      }
+
+      var cdPos = cdOffset, parsed = 0;
+      for (var e = 0; e < numEntries; e++) {
+        if (cdPos + 46 > buf.length) { log('CD truncated at entry ' + e); break; }
+        if (buf[cdPos] !== 0x50 || buf[cdPos+1] !== 0x4B || buf[cdPos+2] !== 0x01 || buf[cdPos+3] !== 0x02) {
+          log('Bad CD signature at entry ' + e); break;
+        }
+
+        var nameLen = readUint16LE(buf, cdPos + 28);
+        var extraLen = readUint16LE(buf, cdPos + 30);
+        var commentLen = readUint16LE(buf, cdPos + 32);
+        var localOffset = readUint32LE(buf, cdPos + 42);
+        var compMethod = readUint16LE(buf, cdPos + 10);
+        var compSize = readUint32LE(buf, cdPos + 20);
+        var uncompSize = readUint32LE(buf, cdPos + 24);
+        var crc = readUint32LE(buf, cdPos + 16);
+        var gpFlags = readUint16LE(buf, cdPos + 8);
+
+        var nameBytes = buf.slice(cdPos + 46, cdPos + 46 + nameLen);
+        var name = bytesToUtf8(nameBytes);
+
+        if (localOffset + 30 > buf.length) {
+          log('Local header out of bounds for ' + name); 
+          cdPos += 46 + nameLen + extraLen + commentLen; continue;
+        }
+
+        var localNameLen = readUint16LE(buf, localOffset + 26);
+        var localExtraLen = readUint16LE(buf, localOffset + 28);
+        var dataStart = localOffset + 30 + localNameLen + localExtraLen;
+
+        // Data descriptor flag (bit 3)
+        var hasDataDescriptor = (gpFlags & 0x08) !== 0;
+
+        if (compSize === 0 && !hasDataDescriptor) {
+          // Empty file or stored with size in local header
+          compSize = readUint32LE(buf, localOffset + 18);
+        }
+        if (compSize === 0xFFFFFFFF || (compSize === 0 && hasDataDescriptor)) {
+          // Need to scan for next local header or data descriptor
+          // For data descriptor, the descriptor is 12 or 16 bytes after data
+          // We'll estimate by scanning forward
+          compSize = estimateCompSize(buf, dataStart, hasDataDescriptor);
+        }
+
+        var dataEnd = dataStart + compSize;
+        if (dataEnd > buf.length) {
+          log('Data truncated for ' + name + ', adjusting');
+          dataEnd = buf.length;
+          compSize = dataEnd - dataStart;
+        }
+
+        var compressedData = buf.slice(dataStart, dataEnd);
+        var uncompressedData;
+
+        if (compMethod === 0) {
+          uncompressedData = compressedData;
+        } else if (compMethod === 8) {
+          try {
+            uncompressedData = await inflateRaw(compressedData);
+            log('Inflated ' + name + ': ' + compressedData.length + ' -> ' + uncompressedData.length);
+          } catch(err) {
+            log('Inflate error for ' + name + ': ' + err.message + ' — using raw compressed data');
+            uncompressedData = compressedData;
+          }
+        } else {
+          log('Unsupported method ' + compMethod + ' for ' + name + ' — using raw');
+          uncompressedData = compressedData;
+        }
+
+        self.files[name] = new ZipEntry(name, uncompressedData, { binary: true, crc: crc });
+        parsed++;
+        cdPos += 46 + nameLen + extraLen + commentLen;
+      }
+
+      log('Parsed ' + parsed + ' entries from CD');
+      if (parsed === 0) {
+        log('CD parsing failed, scanning local headers...');
+        self.files = await scanLocalHeaders(buf);
+      }
+      log('Total files: ' + Object.keys(self.files).length);
+      return self;
+    })();
   };
 
-  // Scan for local file headers as fallback
+  // Estimate compressed size when data descriptor is present or size is unknown
+  function estimateCompSize(buf, dataStart, hasDataDescriptor) {
+    // Scan forward for next local header signature or data descriptor signature
+    var maxScan = Math.min(buf.length - dataStart, 50 * 1024 * 1024); // 50MB max scan
+    for (var i = 4; i < maxScan; i++) {
+      // Look for data descriptor signature (0x50 0x4B 0x07 0x08) or next local header
+      if (buf[dataStart + i] === 0x50 && buf[dataStart + i + 1] === 0x4B) {
+        if (buf[dataStart + i + 2] === 0x07 && buf[dataStart + i + 3] === 0x08) {
+          // Data descriptor signature found
+          return i;
+        }
+        if (buf[dataStart + i + 2] === 0x03 && buf[dataStart + i + 3] === 0x04) {
+          // Next local header found
+          return i;
+        }
+      }
+    }
+    // Fallback: use remaining buffer
+    return buf.length - dataStart;
+  }
+
   async function scanLocalHeaders(buf) {
     var files = {};
     var pos = 0;
@@ -880,28 +1272,17 @@ function log(msg) {
         var name = bytesToUtf8(nameBytes);
 
         var dataStart = pos + 30 + nameLen + extraLen;
-        var dataEnd;
+        var hasDD = (flags & 0x08) !== 0;
 
-        if ((flags & 0x08) && compSize === 0) {
-          // Data descriptor record: sizes are 0 in local header; find real end by scanning
-          dataEnd = buf.length; // fallback
-          for (var ds = dataStart; ds <= buf.length - 4; ds++) {
-            if (buf[ds] === 0x50 && buf[ds+1] === 0x4B) {
-              // Optional data-descriptor signature PK\x07\x08
-              if (buf[ds+2] === 0x07 && buf[ds+3] === 0x08) { dataEnd = ds; break; }
-              // Next local-file-header signature PK\x03\x04 (must be past a min offset)
-              if (ds > dataStart + 4 && buf[ds+2] === 0x03 && buf[ds+3] === 0x04) { dataEnd = ds; break; }
-            }
-          }
+        if (compSize === 0 && hasDD) {
+          compSize = estimateCompSize(buf, dataStart, true);
+        }
+
+        var dataEnd = dataStart + compSize;
+        if (dataEnd > buf.length) {
+          log('Local scan: data exceeds buffer for ' + name + ', adjusting');
+          dataEnd = buf.length;
           compSize = dataEnd - dataStart;
-          log('Data descriptor entry: ' + name + ', inferred compSize=' + compSize);
-        } else {
-          dataEnd = dataStart + compSize;
-          if (dataEnd > buf.length) {
-            log('Local header data exceeds buffer for ' + name + ', trying to continue');
-            dataEnd = buf.length;
-            compSize = dataEnd - dataStart;
-          }
         }
 
         var compressedData = buf.slice(dataStart, dataEnd);
@@ -911,26 +1292,18 @@ function log(msg) {
           uncompressedData = compressedData;
         } else if (method === 8) {
           try {
-            uncompressedData = await inflateRawAsync(compressedData);
+            uncompressedData = await inflateRaw(compressedData);
           } catch(err) {
-            log('Inflate error for ' + name + ': ' + err.message + ', using raw');
+            log('Local scan inflate error for ' + name + ': ' + err.message);
             uncompressedData = compressedData;
           }
         } else {
-          log('Unsupported method ' + method + ' for ' + name + ', using raw');
           uncompressedData = compressedData;
         }
 
         files[name] = new ZipEntry(name, uncompressedData, { binary: true });
         log('Scanned: ' + name + ' (' + uncompressedData.length + ' bytes)');
-
-        // Advance past an optional data descriptor (PK\x07\x08 + crc + compSize + uncompSize)
         pos = dataEnd;
-        if (pos + 4 <= buf.length &&
-            buf[pos] === 0x50 && buf[pos+1] === 0x4B &&
-            buf[pos+2] === 0x07 && buf[pos+3] === 0x08) {
-          pos += 16; // sig(4) + crc(4) + compressedSize(4) + uncompressedSize(4)
-        }
       } else {
         pos++;
       }
@@ -938,166 +1311,18 @@ function log(msg) {
     return files;
   }
 
-  ZipFile.prototype.loadAsync = function(data) {
-    var self = this;
-    return (async function() {
-      var buf;
-      if (data instanceof ArrayBuffer) buf = new Uint8Array(data);
-      else if (data instanceof Uint8Array) buf = data;
-      else throw new Error('Expected ArrayBuffer or Uint8Array, got ' + typeof data);
-
-      log('ZIP buffer size: ' + buf.length);
-
-      // Try EOCD method first
-      var pos = buf.length - 22;
-      var found = false;
-      var eocdPos = -1;
-      while (pos >= Math.max(0, buf.length - 65557)) {
-        if (buf[pos] === 0x50 && buf[pos+1] === 0x4B && buf[pos+2] === 0x05 && buf[pos+3] === 0x06) {
-          var commentLen = readUint16LE(buf, pos + 20);
-          if (pos + 22 + commentLen === buf.length) {
-            found = true;
-            eocdPos = pos;
-            break;
-          }
-        }
-        pos--;
-      }
-
-      if (!found) {
-        log('EOCD not found, falling back to local header scan');
-        self.files = await scanLocalHeaders(buf);
-        if (Object.keys(self.files).length === 0) throw new Error('Invalid zip: no local file headers found');
-        log('Local scan found ' + Object.keys(self.files).length + ' files');
-        return self;
-      }
-
-      log('EOCD found at ' + eocdPos);
-      var cdOffset = readUint32LE(buf, eocdPos + 16);
-      var cdSize = readUint32LE(buf, eocdPos + 12);
-      var numEntries = readUint16LE(buf, eocdPos + 8);
-      log('Entries: ' + numEntries + ', CD offset: ' + cdOffset + ', CD size: ' + cdSize);
-
-      // Check for Zip64
-      if (cdOffset === 0xFFFFFFFF || cdSize === 0xFFFFFFFF || numEntries === 0xFFFF) {
-        log('Zip64 detected, scanning local headers instead');
-        self.files = await scanLocalHeaders(buf);
-        if (Object.keys(self.files).length === 0) throw new Error('Zip64: local header scan failed');
-        log('Local scan found ' + Object.keys(self.files).length + ' files');
-        return self;
-      }
-
-      var cdPos = cdOffset;
-      var parsed = 0;
-      for (var e = 0; e < numEntries; e++) {
-        if (cdPos + 46 > buf.length) { log('CD truncated at entry ' + e + ', pos=' + cdPos); break; }
-        if (buf[cdPos] !== 0x50 || buf[cdPos+1] !== 0x4B || buf[cdPos+2] !== 0x01 || buf[cdPos+3] !== 0x02) {
-          log('Bad CD signature at entry ' + e + ', pos=' + cdPos + ': ' +
-              buf[cdPos].toString(16) + ' ' + buf[cdPos+1].toString(16) + ' ' +
-              buf[cdPos+2].toString(16) + ' ' + buf[cdPos+3].toString(16));
-          break;
-        }
-
-        var nameLen = readUint16LE(buf, cdPos + 28);
-        var extraLen = readUint16LE(buf, cdPos + 30);
-        var commentLen = readUint16LE(buf, cdPos + 32);
-        var localOffset = readUint32LE(buf, cdPos + 42);
-        var compMethod = readUint16LE(buf, cdPos + 10);
-        var compSize = readUint32LE(buf, cdPos + 20);
-        var uncompSize = readUint32LE(buf, cdPos + 24);
-        var crc = readUint32LE(buf, cdPos + 16);
-
-        if (cdPos + 46 + nameLen > buf.length) { log('CD entry name truncated at ' + e); break; }
-
-        var nameBytes = buf.slice(cdPos + 46, cdPos + 46 + nameLen);
-        var name = bytesToUtf8(nameBytes);
-
-        if (localOffset + 30 > buf.length) {
-          log('Local header out of bounds for ' + name + ' at offset ' + localOffset);
-          cdPos += 46 + nameLen + extraLen + commentLen;
-          continue;
-        }
-
-        var localNameLen = readUint16LE(buf, localOffset + 26);
-        var localExtraLen = readUint16LE(buf, localOffset + 28);
-        var dataStart = localOffset + 30 + localNameLen + localExtraLen;
-
-        if (compSize === 0xFFFFFFFF) compSize = buf.length - dataStart;
-
-        var dataEnd = dataStart + compSize;
-        if (dataEnd > buf.length) {
-          log('Data truncated for ' + name + ': start=' + dataStart + ' end=' + dataEnd + ' buflen=' + buf.length);
-          dataEnd = buf.length;
-          compSize = dataEnd - dataStart;
-        }
-
-        var compressedData = buf.slice(dataStart, dataEnd);
-        var uncompressedData;
-
-        if (compMethod === 0) {
-          uncompressedData = compressedData;
-        } else if (compMethod === 8) {
-          try {
-            uncompressedData = await inflateRawAsync(compressedData);
-            log('Inflated ' + name + ': ' + compressedData.length + ' -> ' + uncompressedData.length);
-          } catch(err) {
-            log('Inflate error for ' + name + ': ' + err.message);
-            uncompressedData = compressedData;
-          }
-        } else {
-          log('Unsupported method ' + compMethod + ' for ' + name);
-          uncompressedData = compressedData;
-        }
-
-        self.files[name] = new ZipEntry(name, uncompressedData, { binary: true, crc: crc });
-        parsed++;
-        cdPos += 46 + nameLen + extraLen + commentLen;
-      }
-
-      log('Parsed ' + parsed + ' entries from CD');
-      if (parsed === 0) {
-        log('CD parsing failed, falling back to local header scan');
-        self.files = await scanLocalHeaders(buf);
-      }
-
-      log('Total files: ' + Object.keys(self.files).length);
-      return self;
-    })();
-  };
-
   ZipFile.prototype.generateAsync = function(opts) {
     var self = this;
     return (async function() {
-      var entries = [];
-      var cdEntries = [];
+      var entries = [], cdEntries = [];
       var offset = 0;
       var now = new Date();
-
-      async function deflateRawAsync(dataBytes) {
-        var cs = new CompressionStream('deflate-raw');
-        var writer = cs.writable.getWriter();
-        var reader = cs.readable.getReader();
-        writer.write(dataBytes);
-        writer.close();
-        var chunks = [];
-        var totalSize = 0;
-        while (true) {
-          var r = await reader.read();
-          if (r.done) break;
-          chunks.push(r.value);
-          totalSize += r.value.length;
-        }
-        var out = new Uint8Array(totalSize);
-        var off = 0;
-        for (var ci = 0; ci < chunks.length; ci++) { out.set(chunks[ci], off); off += chunks[ci].length; }
-        return out;
-      }
 
       for (var name in self.files) {
         if (!self.files.hasOwnProperty(name)) continue;
         var entry = self.files[name];
         var nameBytes = utf8ToBytes(name);
-        var data = entry.data;
+        var data = entry._data;
 
         var dataBytes;
         if (typeof data === 'string') dataBytes = utf8ToBytes(data);
@@ -1106,21 +1331,28 @@ function log(msg) {
         else dataBytes = utf8ToBytes(String(data));
 
         var uncompressedSize = dataBytes.length;
-        var compressedData;
-        var compMethod;
-        var compSize;
+        var compressedData, compMethod, compSize;
 
-        try {
-          compressedData = await deflateRawAsync(dataBytes);
-          if (compressedData.length < uncompressedSize) {
-            compMethod = 8;
-            compSize = compressedData.length;
-          } else {
+        // Try deflate compression if supported
+        var canCompress = typeof CompressionStream !== 'undefined';
+        if (canCompress) {
+          try {
+            compressedData = await deflateRaw(dataBytes);
+            if (compressedData.length < uncompressedSize) {
+              compMethod = 8;
+              compSize = compressedData.length;
+            } else {
+              compressedData = dataBytes;
+              compMethod = 0;
+              compSize = uncompressedSize;
+            }
+          } catch(err) {
+            log('Compression failed for ' + name + ', storing: ' + err.message);
             compressedData = dataBytes;
             compMethod = 0;
             compSize = uncompressedSize;
           }
-        } catch(err) {
+        } else {
           compressedData = dataBytes;
           compMethod = 0;
           compSize = uncompressedSize;
@@ -1203,11 +1435,506 @@ function log(msg) {
     }
   };
 })(window);
-
 /* ============================================================
    MAIN APP LOGIC
    ============================================================ */
+
+  /* -------- Mach-O Architecture Detection -------- */
+  function detectArchitectures(buf) {
+    var view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+    var magic = view.getUint32(0, false);
+    var archs = [];
+    if (magic === 0xCAFEBABE || magic === 0xCAFEBABF) {
+      // Fat binary
+      var nfat = view.getUint32(4, false);
+      var off = 8;
+      for (var i = 0; i < nfat; i++) {
+        var cputype = view.getInt32(off, false);
+        var cpusubtype = view.getInt32(off + 4, false) & 0xFFFFFF;
+        off += 20;
+        if (cputype === 0x0100000C) archs.push(cpusubtype === 0x80000002 ? 'arm64e' : 'arm64');
+        else if (cputype === 12) archs.push('arm64');
+        else if (cputype === 7) archs.push('armv7');
+        else if (cputype === 0x01000007) archs.push('armv7s');
+        else if (cputype === 0x01000005) archs.push('x86_64');
+        else if (cputype === 0x0100000D) archs.push('arm64_32');
+      }
+    } else if (magic === 0xFEEDFACF || magic === 0xFEEDFACE) {
+      // Single-arch Mach-O
+      var cputype = view.getInt32(4, false);
+      var cpusubtype = view.getInt32(8, false) & 0xFFFFFF;
+      if (cputype === 0x0100000C) archs.push(cpusubtype === 0x80000002 ? 'arm64e' : 'arm64');
+      else if (cputype === 12) archs.push('arm64');
+      else if (cputype === 7) archs.push('armv7');
+      else if (cputype === 0x01000007) archs.push('armv7s');
+      else if (cputype === 0x01000005) archs.push('x86_64');
+      else if (cputype === 0x0100000D) archs.push('arm64_32');
+    }
+    return archs;
+  }
+
+  /* -------- File Tree Renderer -------- */
+  function renderFileTree(zip, appDir) {
+    var tree = document.getElementById('fileTree');
+    tree.innerHTML = '';
+    var files = Object.keys(zip.files).sort();
+    var dirs = {};
+    files.forEach(function(f) {
+      var parts = f.split('/');
+      var path = '';
+      parts.forEach(function(part, idx) {
+        path = path ? path + '/' + part : part;
+        if (idx < parts.length - 1 || f.endsWith('/')) {
+          if (!dirs[path]) dirs[path] = { children: {}, size: 0 };
+        } else {
+          var parent = path.substring(0, path.lastIndexOf('/'));
+          if (!parent) parent = '';
+          if (!dirs[parent]) dirs[parent] = { children: {}, size: 0 };
+          dirs[parent].children[part] = { size: zip.files[f]._data ? (zip.files[f]._data.length || zip.files[f]._data.byteLength || 0) : 0 };
+        }
+      });
+    });
+
+    function renderNode(name, node, depth) {
+      var div = document.createElement('div');
+      div.className = 'ft-item';
+      var indent = '';
+      for (var i = 0; i < depth; i++) indent += '<span class="ft-indent"></span>';
+      div.innerHTML = indent + '<span class="ft-icon">📄</span><span class="ft-name">' + escapeHtml(name) + '</span>' +
+        (node.size ? '<span class="ft-size">' + formatBytes(node.size) + '</span>' : '');
+      tree.appendChild(div);
+    }
+
+    function renderDir(name, node, depth) {
+      var div = document.createElement('div');
+      div.className = 'ft-item';
+      var indent = '';
+      for (var i = 0; i < depth; i++) indent += '<span class="ft-indent"></span>';
+      div.innerHTML = indent + '<span class="ft-icon">📁</span><span class="ft-name ft-folder">' + escapeHtml(name) + '/</span>';
+      tree.appendChild(div);
+      Object.keys(node.children).sort().forEach(function(child) {
+        renderNode(child, node.children[child], depth + 1);
+      });
+    }
+
+    Object.keys(dirs).sort().forEach(function(d) {
+      if (!d.includes('/')) renderDir(d, dirs[d], 0);
+    });
+  }
+
+  function formatBytes(b) {
+    if (b === 0) return '0 B';
+    var k = 1024;
+    var sizes = ['B','KB','MB','GB'];
+    var i = Math.floor(Math.log(b) / Math.log(k));
+    return parseFloat((b / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* -------- Entitlements Extraction -------- */
+  async function extractEntitlements(zip, appDir) {
+    var list = document.getElementById('entitlementsList');
+    list.innerHTML = '';
+    // Try embedded.mobileprovision first
+    var provPath = null;
+    for (var f in zip.files) {
+      if (f.indexOf('embedded.mobileprovision') !== -1 && !f.endsWith('/')) { provPath = f; break; }
+    }
+    var ents = {};
+    if (provPath) {
+      try {
+        var data = await zip.file(provPath).async('uint8array');
+        var text = new TextDecoder('ascii', {fatal:false}).decode(data);
+        var start = text.indexOf('<dict>');
+        var end = text.lastIndexOf('</dict>');
+        if (start !== -1 && end !== -1) {
+          var plistText = text.slice(start, end + 7);
+          // Quick parse of entitlements dict
+          var keyRe = /<key>([^<]+)<\/key>/g;
+          var valRe = /<(true|false|string|integer)>([^<]*)<\/(true|false|string|integer)>/g;
+          var m;
+          while ((m = keyRe.exec(plistText)) !== null) {
+            var key = m[1];
+            var after = plistText.slice(m.index + m[0].length);
+            var vm = after.match(/<(true|false|string|integer)>([^<]*)<\/(true|false|string|integer)>/);
+            if (vm) {
+              ents[key] = vm[1] === 'true' ? true : (vm[1] === 'false' ? false : vm[2]);
+            }
+          }
+        }
+      } catch(e) { log('Entitlements parse error: ' + e.message); }
+    }
+    // Also try binary entitlements in the app binary (simplified)
+    if (Object.keys(ents).length === 0) {
+      list.innerHTML = '<div style="color:var(--text-dim);font-size:0.7rem;">No entitlements found in .mobileprovision. Binary entitlements not yet parsed.</div>';
+      return;
+    }
+    Object.keys(ents).sort().forEach(function(k) {
+      var row = document.createElement('div'); row.className = 'ent-row';
+      var v = ents[k];
+      var vClass = (v === true) ? '' : (v === false ? 'false' : '');
+      row.innerHTML = '<span class="ent-key">' + escapeHtml(k) + '</span><span class="ent-val ' + vClass + '">' + escapeHtml(String(v)) + '</span>';
+      list.appendChild(row);
+    });
+  }
+
+  /* -------- Icon Variants Detection -------- */
+  function detectIconVariants(zip, appDir, plist) {
+    var panel = document.getElementById('iconVariantsPanel');
+    var list = document.getElementById('iconVariantsList');
+    list.innerHTML = '';
+    var variants = [];
+    // Check CFBundleIcons
+    var primary = plist.CFBundleIcons && plist.CFBundleIcons.CFBundlePrimaryIcon;
+    if (primary && primary.CFBundleIconFiles) {
+      primary.CFBundleIconFiles.forEach(function(base) {
+        var exts = ['', '@2x', '@3x', '~ipad', '@2x~ipad', '@3x~ipad'];
+        exts.forEach(function(suffix) {
+          var name = base + suffix + '.png';
+          var path = appDir + name;
+          if (zip.files[path]) variants.push({ name: name, path: path, size: zip.files[path]._data ? zip.files[path]._data.length : 0 });
+        });
+      });
+    }
+    // Check CFBundleIconFiles (older)
+    if (plist.CFBundleIconFiles) {
+      plist.CFBundleIconFiles.forEach(function(base) {
+        var exts = ['', '@2x', '@3x'];
+        exts.forEach(function(suffix) {
+          var name = base + suffix + '.png';
+          var path = appDir + name;
+          if (zip.files[path] && !variants.find(function(v){return v.path===path;})) {
+            variants.push({ name: name, path: path, size: zip.files[path]._data ? zip.files[path]._data.length : 0 });
+          }
+        });
+      });
+    }
+    if (variants.length === 0) { panel.style.display = 'none'; return; }
+    panel.style.display = '';
+    variants.forEach(function(v) {
+      var div = document.createElement('div');
+      div.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:0.3rem;padding:0.4rem;background:var(--surface3);border-radius:4px;border:1px solid var(--border);min-width:70px;';
+      div.innerHTML = '<span style="font-size:0.6rem;color:var(--text-dim);max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(v.name) + '</span><span style="font-size:0.55rem;color:var(--text-dim);">' + formatBytes(v.size) + '</span>';
+      list.appendChild(div);
+    });
+  }
+
+  /* -------- URL Schemes Management -------- */
+  function populateUrlSchemes(plist) {
+    var container = document.getElementById('urlSchemesList');
+    container.innerHTML = '';
+    var types = plist.CFBundleURLTypes || [];
+    var schemes = [];
+    types.forEach(function(t) {
+      if (t.CFBundleURLSchemes) {
+        t.CFBundleURLSchemes.forEach(function(s) { schemes.push(s); });
+      }
+    });
+    schemes.forEach(function(s) { addUrlSchemeInput(s); });
+  }
+  function addUrlSchemeInput(val) {
+    val = val || '';
+    var container = document.getElementById('urlSchemesList');
+    var div = document.createElement('div'); div.className = 'url-item';
+    div.innerHTML = '<input type="text" class="form-control url-scheme-input" placeholder="myapp" value="' + escapeHtml(val) + '"><button type="button" class="btn-icon" onclick="this.parentElement.remove()">×</button>';
+    container.appendChild(div);
+  }
+  function collectUrlSchemes() {
+    var inputs = document.querySelectorAll('.url-scheme-input');
+    var schemes = [];
+    inputs.forEach(function(inp) { if (inp.value.trim()) schemes.push(inp.value.trim()); });
+    return schemes;
+  }
+
+  /* -------- Background Modes -------- */
+  function populateBackgroundModes(plist) {
+    var modes = plist.UIBackgroundModes || [];
+    var checkboxes = document.querySelectorAll('#bgModesGrid input[type="checkbox"]');
+    checkboxes.forEach(function(cb) { cb.checked = modes.indexOf(cb.value) !== -1; });
+  }
+  function collectBackgroundModes() {
+    var modes = [];
+    var checkboxes = document.querySelectorAll('#bgModesGrid input[type="checkbox"]:checked');
+    checkboxes.forEach(function(cb) { modes.push(cb.value); });
+    return modes;
+  }
+
+  /* -------- Privacy Descriptions -------- */
+  function populatePrivacyDescriptions(plist) {
+    document.getElementById('privCamera').value = plist.NSCameraUsageDescription || '';
+    document.getElementById('privPhoto').value = plist.NSPhotoLibraryUsageDescription || '';
+    document.getElementById('privMic').value = plist.NSMicrophoneUsageDescription || '';
+    document.getElementById('privLocation').value = plist.NSLocationWhenInUseUsageDescription || '';
+  }
+  function applyPrivacyDescriptions(plist) {
+    var cam = document.getElementById('privCamera').value.trim();
+    var photo = document.getElementById('privPhoto').value.trim();
+    var mic = document.getElementById('privMic').value.trim();
+    var loc = document.getElementById('privLocation').value.trim();
+    if (cam) plist.NSCameraUsageDescription = cam; else delete plist.NSCameraUsageDescription;
+    if (photo) plist.NSPhotoLibraryUsageDescription = photo; else delete plist.NSPhotoLibraryUsageDescription;
+    if (mic) plist.NSMicrophoneUsageDescription = mic; else delete plist.NSMicrophoneUsageDescription;
+    if (loc) plist.NSLocationWhenInUseUsageDescription = loc; else delete plist.NSLocationWhenInUseUsageDescription;
+  }
+
+  /* -------- Multi-Icon Injection -------- */
+  async function injectIconVariant(zip, path, blob, targetSize) {
+    var img = await new Promise(function(res, rej) {
+      var i = new Image();
+      i.onload = function() { res(i); };
+      i.onerror = function() { rej(new Error('Failed to decode image')); };
+      i.src = URL.createObjectURL(blob);
+    });
+    var cvs = document.createElement('canvas');
+    cvs.width = targetSize; cvs.height = targetSize;
+    cvs.getContext('2d').drawImage(img, 0, 0, targetSize, targetSize);
+    var png = await new Promise(function(r) { cvs.toBlob(r, 'image/png'); });
+    URL.revokeObjectURL(img.src);
+    if (!png) throw new Error('Canvas toBlob returned null');
+    var buf = new Uint8Array(await png.arrayBuffer());
+    zip.file(path, buf, {binary:true});
+    return png;
+  }
+
+  /* -------- Code Signature Stripping -------- */
+  function stripCodeSignature(zip, appDir) {
+    var removed = 0;
+    for (var f in zip.files) {
+      if (f.indexOf(appDir + '_CodeSignature/') === 0) {
+        delete zip.files[f];
+        removed++;
+        log('Stripped: ' + f);
+      }
+    }
+    return removed;
+  }
+
+
+  /* -------- Mach-O Encryption Detection -------- */
+  function detectEncryption(buf) {
+    var view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+    var magic = view.getUint32(0, false);
+    var off = 0;
+    if (magic === 0xCAFEBABE || magic === 0xCAFEBABF) {
+      var nfat = view.getUint32(4, false);
+      off = 8;
+      for (var i = 0; i < nfat; i++) {
+        var cputype = view.getInt32(off, false);
+        var cpusubtype = view.getInt32(off + 4, false);
+        var offset = view.getUint32(off + 8, false);
+        off += 20;
+        var sliceMagic = view.getUint32(offset, false);
+        if (sliceMagic === 0xFEEDFACF) {
+          var ncmds = view.getUint32(offset + 16, false);
+          var cmdOff = offset + 32;
+          for (var j = 0; j < ncmds; j++) {
+            var cmd = view.getUint32(cmdOff, false);
+            var cmdSize = view.getUint32(cmdOff + 4, false);
+            if (cmd === 0x21) { // LC_ENCRYPTION_INFO_64
+              var cryptId = view.getUint32(cmdOff + 16, false);
+              return cryptId !== 0;
+            }
+            if (cmd === 0x1D) { // LC_ENCRYPTION_INFO
+              var cryptId32 = view.getUint32(cmdOff + 12, false);
+              return cryptId32 !== 0;
+            }
+            cmdOff += cmdSize;
+          }
+        }
+      }
+    } else if (magic === 0xFEEDFACF) {
+      var ncmds = view.getUint32(16, false);
+      var cmdOff = 32;
+      for (var j = 0; j < ncmds; j++) {
+        var cmd = view.getUint32(cmdOff, false);
+        var cmdSize = view.getUint32(cmdOff + 4, false);
+        if (cmd === 0x21) {
+          var cryptId = view.getUint32(cmdOff + 16, false);
+          return cryptId !== 0;
+        }
+        if (cmd === 0x1D) {
+          var cryptId32 = view.getUint32(cmdOff + 12, false);
+          return cryptId32 !== 0;
+        }
+        cmdOff += cmdSize;
+      }
+    }
+    return null; // unknown
+  }
+
+  /* -------- Provisioning Profile Parser -------- */
+  async function parseProvisioningProfile(zip, appDir) {
+    var provPath = null;
+    for (var f in zip.files) {
+      if (f.indexOf('embedded.mobileprovision') !== -1 && !f.endsWith('/')) { provPath = f; break; }
+    }
+    if (!provPath) return null;
+    try {
+      var data = await zip.file(provPath).async('uint8array');
+      var text = new TextDecoder('ascii', {fatal:false}).decode(data);
+      // Extract plist from CMS wrapper
+      var start = text.indexOf('<?xml');
+      var end = text.lastIndexOf('</plist>');
+      if (start === -1 || end === -1) return null;
+      var plistText = text.slice(start, end + 8);
+      var provPlist = plist.parse(plistText);
+      return { data: data, plist: provPlist, path: provPath };
+    } catch(e) { log('Provisioning profile parse error: ' + e.message); return null; }
+  }
+
+  function populateProvisioningProfile(prov) {
+    var panel = document.getElementById('provProfilePanel');
+    if (!prov || !prov.plist) { panel.style.display = 'none'; return; }
+    panel.style.display = '';
+    var p = prov.plist;
+    document.getElementById('provTeamId').textContent = p.TeamIdentifier && p.TeamIdentifier[0] ? p.TeamIdentifier[0] : (p.TeamIdentifier || '—');
+    document.getElementById('provAppId').textContent = p.AppIDName || (p.ApplicationIdentifierPrefix && p.ApplicationIdentifierPrefix[0] ? p.ApplicationIdentifierPrefix[0] : '—');
+    document.getElementById('provName').textContent = p.Name || '—';
+    document.getElementById('provType').textContent = p.ProvisionsAllDevices ? 'Enterprise' : (p.getTaskAllow ? 'Development' : 'Distribution');
+
+    var createdEl = document.getElementById('provCreated');
+    var expiresEl = document.getElementById('provExpires');
+    if (p.CreationDate) {
+      var d = new Date(p.CreationDate);
+      createdEl.textContent = d.toLocaleDateString();
+    } else { createdEl.textContent = '—'; }
+    if (p.ExpirationDate) {
+      var d = new Date(p.ExpirationDate);
+      var now = new Date();
+      expiresEl.textContent = d.toLocaleDateString();
+      expiresEl.className = d < now ? 'prov-val expired' : 'prov-val valid';
+      if (d < now) expiresEl.textContent += ' (EXPIRED)';
+    } else { expiresEl.textContent = '—'; expiresEl.className = 'prov-val'; }
+  }
+
+  /* -------- Orientations -------- */
+  function populateOrientations(plist) {
+    var oris = plist.UISupportedInterfaceOrientations || [];
+    var map = {
+      'UIInterfaceOrientationPortrait': 'ori_portrait',
+      'UIInterfaceOrientationPortraitUpsideDown': 'ori_portraitUpsideDown',
+      'UIInterfaceOrientationLandscapeLeft': 'ori_landscapeLeft',
+      'UIInterfaceOrientationLandscapeRight': 'ori_landscapeRight'
+    };
+    Object.keys(map).forEach(function(k) {
+      document.getElementById(map[k]).checked = oris.indexOf(k) !== -1;
+    });
+  }
+  function collectOrientations() {
+    var map = {
+      'ori_portrait': 'UIInterfaceOrientationPortrait',
+      'ori_portraitUpsideDown': 'UIInterfaceOrientationPortraitUpsideDown',
+      'ori_landscapeLeft': 'UIInterfaceOrientationLandscapeLeft',
+      'ori_landscapeRight': 'UIInterfaceOrientationLandscapeRight'
+    };
+    var oris = [];
+    Object.keys(map).forEach(function(id) {
+      if (document.getElementById(id).checked) oris.push(map[id]);
+    });
+    return oris;
+  }
+
+  /* -------- App Transport Security -------- */
+  function populateATS(plist) {
+    var ats = plist.NSAppTransportSecurity || {};
+    document.getElementById('atsArbitrary').checked = !!ats.NSAllowsArbitraryLoads;
+  }
+  function applyATS(plist) {
+    var enable = document.getElementById('atsArbitrary').checked;
+    if (enable) {
+      if (!plist.NSAppTransportSecurity) plist.NSAppTransportSecurity = {};
+      plist.NSAppTransportSecurity.NSAllowsArbitraryLoads = true;
+    } else {
+      if (plist.NSAppTransportSecurity) {
+        delete plist.NSAppTransportSecurity.NSAllowsArbitraryLoads;
+        if (Object.keys(plist.NSAppTransportSecurity).length === 0) delete plist.NSAppTransportSecurity;
+      }
+    }
+  }
+
+  /* -------- Device Capabilities -------- */
+  function populateCapabilities(plist) {
+    var caps = plist.UIRequiredDeviceCapabilities || [];
+    var checkboxes = document.querySelectorAll('#capGrid input[type="checkbox"]');
+    checkboxes.forEach(function(cb) { cb.checked = caps.indexOf(cb.value) !== -1; });
+  }
+  function collectCapabilities() {
+    var caps = [];
+    var checkboxes = document.querySelectorAll('#capGrid input[type="checkbox"]:checked');
+    checkboxes.forEach(function(cb) { caps.push(cb.value); });
+    return caps;
+  }
+
+  /* -------- File Tree Search -------- */
+  function setupFileTreeSearch() {
+    var search = document.createElement('input');
+    search.type = 'text';
+    search.className = 'ft-search';
+    search.placeholder = '🔍 Filter files...';
+    search.id = 'fileTreeSearch';
+    var tree = document.getElementById('fileTree');
+    tree.parentNode.insertBefore(search, tree);
+    search.addEventListener('input', function() {
+      var term = this.value.toLowerCase();
+      var items = tree.querySelectorAll('.ft-item');
+      items.forEach(function(item) {
+        var name = item.querySelector('.ft-name');
+        if (name) {
+          var show = name.textContent.toLowerCase().indexOf(term) !== -1;
+          item.style.display = show ? '' : 'none';
+        }
+      });
+    });
+  }
+
+  /* -------- Export Functions -------- */
+  function exportPlist() {
+    if (!State.plist) { setStatus('No plist loaded', true); return; }
+    var xml = plist.build(State.plist);
+    var blob = new Blob([xml], {type: 'application/xml'});
+    downloadBlob(blob, 'Info.plist');
+    setStatus('✅ Info.plist exported', false);
+  }
+  async function exportEntitlements() {
+    if (!State.zip || !State.appDir) { setStatus('No IPA loaded', true); return; }
+    var prov = await parseProvisioningProfile(State.zip, State.appDir);
+    if (!prov || !prov.plist || !prov.plist.Entitlements) {
+      setStatus('No entitlements found in provisioning profile', true); return;
+    }
+    var xml = plist.build(prov.plist.Entitlements);
+    var blob = new Blob([xml], {type: 'application/xml'});
+    downloadBlob(blob, 'Entitlements.plist');
+    setStatus('✅ Entitlements exported', false);
+  }
+  async function exportMobileProv() {
+    if (!State.zip || !State.appDir) { setStatus('No IPA loaded', true); return; }
+    var provPath = null;
+    for (var f in State.zip.files) {
+      if (f.indexOf('embedded.mobileprovision') !== -1 && !f.endsWith('/')) { provPath = f; break; }
+    }
+    if (!provPath) { setStatus('No .mobileprovision found', true); return; }
+    var data = await State.zip.file(provPath).async('uint8array');
+    var blob = new Blob([data], {type: 'application/octet-stream'});
+    downloadBlob(blob, 'embedded.mobileprovision');
+    setStatus('✅ .mobileprovision exported', false);
+  }
+
 document.addEventListener('DOMContentLoaded', function(){
+  // Browser capability check
+  if (typeof DecompressionStream === 'undefined') {
+    setStatus('ERROR: Your browser does not support DecompressionStream. Please use Chrome 80+, Edge 80+, Firefox 105+, or Safari 16.4+.', true);
+    return;
+  }
+  log('Browser supports DecompressionStream ✓');
+  if (typeof CompressionStream === 'undefined') {
+    log('Warning: CompressionStream not available — generated IPA will be stored (larger but valid)');
+  } else {
+    log('Browser supports CompressionStream ✓');
+  }
+
   var State = {
     zip: null, plist: null, plistPath: null, appDir: null,
     iconPath: null, originalPlistBuf: null, originalIconBlob: null,
@@ -1246,6 +1973,19 @@ document.addEventListener('DOMContentLoaded', function(){
     inpDisplay.value = inpBundleId.value = inpName.value = '';
     inpVersion.value = inpShort.value = inpMinOS.value = '';
     chkFiles.checked = false;
+    document.getElementById('bundleExecutable').value = '';
+    document.getElementById('urlSchemesList').innerHTML = '';
+    var bgCbs = document.querySelectorAll('#bgModesGrid input[type="checkbox"]');
+    bgCbs.forEach(function(cb) { cb.checked = false; });
+    document.getElementById('privCamera').value = '';
+    document.getElementById('privPhoto').value = '';
+    document.getElementById('privMic').value = '';
+    document.getElementById('privLocation').value = '';
+    document.getElementById('stripSignature').checked = false;
+    document.getElementById('infoBar').classList.add('hidden');
+    document.getElementById('fileTreePanel').style.display = 'none';
+    document.getElementById('entitlementsPanel').style.display = 'none';
+    document.getElementById('iconVariantsPanel').style.display = 'none';
     appIconImg.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%23222' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='67' font-size='40' text-anchor='middle' fill='%23777'%3E📱%3C/text%3E%3C/svg%3E";
     if (State.iconPreviewUrl) { URL.revokeObjectURL(State.iconPreviewUrl); State.iconPreviewUrl = null; }
   }
@@ -1274,7 +2014,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
   async function populateUI(zip, p, plistPath, appDir) {
     inpBundleId.value = p.CFBundleIdentifier || '';
-    // Update identity display labels
     var _dl = document.getElementById('iconDisplayLabel');
     var _bl = document.getElementById('iconBundleLabel');
     if (_dl) _dl.textContent = p.CFBundleDisplayName || p.CFBundleName || 'Unknown App';
@@ -1286,6 +2025,88 @@ document.addEventListener('DOMContentLoaded', function(){
     inpMinOS.value    = p.MinimumOSVersion || '';
     chkFiles.checked  = !!(p.UISupportsDocumentBrowser || p.UIFileSharingEnabled || p.LSSupportsOpeningDocumentsInPlace);
 
+    // Advanced fields
+    document.getElementById('bundleExecutable').value = p.CFBundleExecutable || '';
+    populateUrlSchemes(p);
+    populateBackgroundModes(p);
+    populatePrivacyDescriptions(p);
+    populateOrientations(p);
+    populateATS(p);
+    populateCapabilities(p);
+
+    // Info bar
+    var infoBar = document.getElementById('infoBar');
+    infoBar.classList.remove('hidden');
+    document.getElementById('infoFileCount').textContent = Object.keys(zip.files).length;
+    var totalSize = 0;
+    Object.keys(zip.files).forEach(function(f) {
+      var d = zip.files[f]._data;
+      totalSize += d ? (d.length || d.byteLength || 0) : 0;
+    });
+    document.getElementById('infoSize').textContent = formatBytes(totalSize);
+
+    // Plist type
+    var plistBytes = new Uint8Array(State.originalPlistBuf || []);
+    var isBinary = plistBytes.length > 8 && plistBytes[0] === 0x62 && plistBytes[1] === 0x70;
+    document.getElementById('infoPlistType').textContent = isBinary ? 'Binary' : 'XML';
+
+    // Architecture detection + encryption
+    var execName = p.CFBundleExecutable;
+    var archs = [];
+    var isEncrypted = null;
+    if (execName) {
+      var execPath = appDir + execName;
+      var execEntry = zip.file(execPath);
+      if (execEntry) {
+        try {
+          var execData = await execEntry.async('uint8array');
+          archs = detectArchitectures(execData);
+          isEncrypted = detectEncryption(execData);
+        } catch(e) { log('Arch/encryption detection error: ' + e.message); }
+      }
+    }
+    var archEl = document.getElementById('infoArchs');
+    if (archs.length) {
+      archEl.innerHTML = archs.map(function(a) {
+        var cls = a === 'arm64' ? 'arch-arm64' : (a === 'arm64e' ? 'arch-arm64e' : (a === 'armv7' ? 'arch-armv7' : 'arch-x86'));
+        return '<span class="arch-badge ' + cls + '">' + a + '</span>';
+      }).join('');
+    } else {
+      archEl.textContent = '—';
+    }
+
+    // Encryption badge
+    var encBadge = document.getElementById('encBadge');
+    if (isEncrypted !== null) {
+      encBadge.style.display = '';
+      if (isEncrypted) {
+        encBadge.className = 'enc-badge enc-encrypted';
+        encBadge.textContent = '🔒 Encrypted (FairPlay)';
+      } else {
+        encBadge.className = 'enc-badge enc-clear';
+        encBadge.textContent = '🔓 Not Encrypted';
+      }
+    } else {
+      encBadge.style.display = 'none';
+    }
+
+    // File tree
+    document.getElementById('fileTreePanel').style.display = '';
+    renderFileTree(zip, appDir);
+    setupFileTreeSearch();
+
+    // Entitlements
+    document.getElementById('entitlementsPanel').style.display = '';
+    await extractEntitlements(zip, appDir);
+
+    // Provisioning profile
+    var prov = await parseProvisioningProfile(zip, appDir);
+    populateProvisioningProfile(prov);
+
+    // Icon variants
+    detectIconVariants(zip, appDir, p);
+
+    // Icon main
     var base = getIconBaseName(p);
     if (!base) { setStatus('No standard icon key found — you can still replace manually', false); return; }
     var full = findIconPath(zip, appDir, base);
@@ -1376,23 +2197,87 @@ document.addEventListener('DOMContentLoaded', function(){
       next.CFBundleShortVersionString = inpShort.value.trim();
       if (inpMinOS.value.trim()) next.MinimumOSVersion = inpMinOS.value.trim();
 
+      // Executable name
+      var execName = document.getElementById('bundleExecutable').value.trim();
+      if (execName) next.CFBundleExecutable = execName;
+
+      // Files app
       var enable = chkFiles.checked;
       next.UISupportsDocumentBrowser = enable;
       next.UIFileSharingEnabled = enable;
       next.LSSupportsOpeningDocumentsInPlace = enable;
 
+      // URL schemes
+      var schemes = collectUrlSchemes();
+      if (schemes.length) {
+        next.CFBundleURLTypes = [{ CFBundleURLName: next.CFBundleIdentifier, CFBundleURLSchemes: schemes }];
+      } else {
+        delete next.CFBundleURLTypes;
+      }
+
+      // Background modes
+      var bgModes = collectBackgroundModes();
+      if (bgModes.length) next.UIBackgroundModes = bgModes;
+      else delete next.UIBackgroundModes;
+
+      // Privacy descriptions
+      applyPrivacyDescriptions(next);
+
+      // Orientations
+      var oris = collectOrientations();
+      if (oris.length) next.UISupportedInterfaceOrientations = oris;
+      else delete next.UISupportedInterfaceOrientations;
+
+      // App Transport Security
+      applyATS(next);
+
+      // Device capabilities
+      var caps = collectCapabilities();
+      if (caps.length) next.UIRequiredDeviceCapabilities = caps;
+      else delete next.UIRequiredDeviceCapabilities;
+
+      // Build plist (always XML output)
       var xml = plist.build(next);
       State.zip.file(State.plistPath, xml, {binary:false});
       State.plist = next;
 
+      // Icon injection - main + variants
       if (State.newIconBlob && State.iconPath) {
         var pngBlob = await injectIcon(State.zip, State.iconPath, State.newIconBlob);
+        // Inject variants
+        var variants = document.querySelectorAll('#iconVariantsList > div');
+        var sizes = [20,29,40,57,60,76,80,87,114,120,152,167,180,1024];
+        var variantPaths = [];
+        for (var f in State.zip.files) {
+          if (f.indexOf(State.appDir) === 0 && /\.png$/i.test(f) && f.indexOf('_CodeSignature') === -1) {
+            variantPaths.push(f);
+          }
+        }
+        // Only resize-inject common icon sizes, skip the main one we already did
+        for (var i = 0; i < variantPaths.length; i++) {
+          if (variantPaths[i] === State.iconPath) continue;
+          var name = variantPaths[i].substring(variantPaths[i].lastIndexOf('/') + 1);
+          // Guess size from filename
+          var sizeMatch = name.match(/(\d+)/);
+          var targetSize = sizeMatch ? parseInt(sizeMatch[1]) : 60;
+          if (targetSize > 1024) targetSize = 1024;
+          try {
+            await injectIconVariant(State.zip, variantPaths[i], State.newIconBlob, targetSize);
+            log('Resized icon variant: ' + name + ' @ ' + targetSize + 'px');
+          } catch(e) { log('Icon variant skip: ' + name + ' — ' + e.message); }
+        }
         if (State.iconPreviewUrl) URL.revokeObjectURL(State.iconPreviewUrl);
         State.iconPreviewUrl = URL.createObjectURL(pngBlob);
         appIconImg.src = State.iconPreviewUrl;
         State.newIconBlob = null;
       } else if (State.newIconBlob && !State.iconPath) {
         setStatus('⚠️ Icon selected but no original icon path found. Icon not injected.', true);
+      }
+
+      // Strip code signature
+      if (document.getElementById('stripSignature').checked) {
+        var stripped = stripCodeSignature(State.zip, State.appDir);
+        log('Stripped ' + stripped + ' code signature files');
       }
 
       var blob = await State.zip.generateAsync({type:'blob'});
@@ -1435,7 +2320,6 @@ document.addEventListener('DOMContentLoaded', function(){
       var plistBuf = await zf.async('arraybuffer');
       log('Plist buffer: ' + plistBuf.byteLength + ' bytes');
 
-      log('Plist buffer size: ' + plistBuf.byteLength + ' bytes');
       var plistObj = plist.parse(new Uint8Array(plistBuf));
       log('Plist parsed successfully');
       log('Keys: ' + Object.keys(plistObj).join(', '));
@@ -1495,6 +2379,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   form.addEventListener('submit', function(e) { e.preventDefault(); buildAndDownload(); });
   resetBtn.addEventListener('click', resetOriginal);
+  document.getElementById('addUrlSchemeBtn').addEventListener('click', function() { addUrlSchemeInput(); });
+  document.getElementById('exportPlistBtn').addEventListener('click', exportPlist);
+  document.getElementById('exportEntitlementsBtn').addEventListener('click', exportEntitlements);
+  document.getElementById('exportMobileProvBtn').addEventListener('click', exportMobileProv);
   inpMinOS.addEventListener('blur', function() {
     if (/^\d+$/.test(inpMinOS.value)) inpMinOS.value += '.0';
   });
