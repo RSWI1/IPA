@@ -147,6 +147,32 @@
     .footer-r{font-size:0.59rem;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase;display:flex;align-items:center;gap:0.45rem}
     .footer-r::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:0.35}
 
+    /* AUTO-FILL */
+    .autofill-panel{background:linear-gradient(135deg,rgba(0,255,127,0.04) 0%,rgba(0,20,10,0.0) 100%);border:1px solid rgba(0,255,127,0.22);border-radius:6px;overflow:hidden;margin-bottom:1.1rem}
+    .autofill-head{display:flex;align-items:center;gap:0.65rem;padding:0.72rem 1.2rem;background:rgba(0,255,127,0.05);border-bottom:1px solid rgba(0,255,127,0.13)}
+    .autofill-head .ph-dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+    .autofill-label{font-size:0.59rem;font-weight:600;text-transform:uppercase;letter-spacing:0.14em;color:var(--accent)}
+    .autofill-badge{font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.18rem 0.55rem;border-radius:2px;background:rgba(0,255,127,0.1);border:1px solid rgba(0,255,127,0.28);color:var(--accent);margin-left:auto}
+    .autofill-body{padding:1.1rem 1.35rem}
+    .autofill-desc{font-size:0.66rem;color:var(--text-mid);margin-bottom:0.9rem;line-height:1.7}
+    .autofill-desc strong{color:var(--accent);font-weight:600}
+    .autofill-row{display:flex;gap:0.6rem;align-items:stretch}
+    .autofill-input{flex:1;background:var(--surface3);border:1px solid rgba(0,255,127,0.18);border-radius:4px;padding:0.62rem 0.9rem;color:var(--text);font-family:var(--mono);font-size:0.79rem;transition:border-color .2s,box-shadow .2s}
+    .autofill-input:focus{outline:none;border-color:rgba(0,255,127,0.5);box-shadow:0 0 0 3px rgba(0,255,127,0.09)}
+    .autofill-input::placeholder{color:var(--text-dim);font-style:italic}
+    .btn-autofill{background:var(--accent);border:none;color:#000;font-family:var(--mono);font-size:0.67rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;padding:0.62rem 1.3rem;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;gap:0.5rem;transition:all .22s;white-space:nowrap;flex-shrink:0}
+    .btn-autofill:hover{box-shadow:0 4px 22px rgba(0,255,127,0.38);transform:translateY(-1px)}
+    .btn-autofill:active{transform:none}
+    .btn-autofill:disabled{opacity:0.45;cursor:not-allowed;transform:none;box-shadow:none}
+    .autofill-status{margin-top:0.75rem;font-size:0.66rem;display:flex;align-items:flex-start;gap:0.5rem;min-height:1.2rem}
+    .as-icon{flex-shrink:0;margin-top:0.05rem}
+    .as-text{color:var(--text-mid);line-height:1.55}
+    .as-text.ok{color:var(--accent)}
+    .as-text.err{color:var(--red)}
+    .as-spinner{width:12px;height:12px;border:1.5px solid rgba(0,255,127,0.14);border-top-color:var(--accent);border-radius:50%;animation:spin .75s linear infinite;flex-shrink:0;margin-top:0.12rem}
+    .autofill-fields-preview{margin-top:0.85rem;display:flex;flex-wrap:wrap;gap:0.4rem}
+    .field-chip{font-size:0.55rem;letter-spacing:0.07em;text-transform:uppercase;padding:0.22rem 0.6rem;border-radius:2px;background:rgba(0,255,127,0.08);border:1px solid rgba(0,255,127,0.2);color:var(--accent)}
+
     .hidden{display:none}
     @media(max-width:640px){
       .shell{padding:2rem 1rem}
@@ -178,9 +204,10 @@
         <span class="pill pill-g">100% Offline</span>
         <span class="pill pill-b">ID3v2 Tags</span>
         <span class="pill pill-b">Cover Art</span>
+        <span class="pill pill-g">AI Auto-fill</span>
       </div>
     </div>
-    <p class="brand-desc">Edit ID3v2 metadata — title, artist, album, artwork &amp; more — completely client-side. No upload, no server.</p>
+    <p class="brand-desc">Edit ID3v2 metadata — title, artist, album, artwork &amp; more — completely client-side. Auto-fill any song's tags instantly via AI-powered internet search.</p>
   </header>
 
   <div class="divider"></div>
@@ -231,6 +258,26 @@
   </div>
 
   <div id="editorPanel" class="hidden">
+
+    <!-- Auto-fill from Internet -->
+    <div class="autofill-panel" id="autofillPanel">
+      <div class="autofill-head">
+        <div class="ph-dot"></div>
+        <span class="autofill-label">Auto-fill from Internet</span>
+        <span class="autofill-badge">✦ AI-Powered</span>
+      </div>
+      <div class="autofill-body">
+        <p class="autofill-desc">Tags are <strong>fetched automatically</strong> when you load a file. You can also search any song manually and <strong>all metadata fields</strong> will be filled — title, artist, album, year, genre, composer &amp; more.</p>
+        <div class="autofill-row">
+          <input id="autofillQuery" class="autofill-input" type="text" placeholder='e.g. "Bohemian Rhapsody Queen" or "Blinding Lights The Weeknd"' autocomplete="off" />
+          <button id="autofillBtn" class="btn-autofill" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Auto-fill Tags
+          </button>
+        </div>
+        <div class="autofill-status" id="autofillStatus" style="display:none"></div>
+      </div>
+    </div>
 
     <!-- Cover art -->
     <div class="panel">
@@ -318,7 +365,7 @@
         <div class="fgroup" style="margin-bottom:1.1rem">
           <label>Output Filename</label>
           <div class="filename-row">
-            <input id="outFilename" type="text" class="filename-input" placeholder="track_tagged">
+            <input id="outFilename" type="text" class="filename-input" placeholder="track">
             <span class="filename-ext">.mp3</span>
           </div>
         </div>
@@ -718,11 +765,42 @@ async function handleUpload(file) {
     populateFileInfo(file);
 
     // Prefill output name
-    sv('outFilename', file.name.replace(/\.mp3$/i,'') + '_tagged');
+    sv('outFilename', file.name.replace(/\.mp3$/i,'') + '');
 
     editorPanel.classList.remove('hidden');
     var src = tags._found ? 'Tags read from ID3' + tags._found + '.' : 'No ID3 tags found — fields are blank.';
     setStatus(src, '');
+
+    // ── Auto-fetch: build query from tags or filename, then trigger autofill ──
+    (function() {
+      var t  = (tags.title  || '').trim();
+      var ar = (tags.artist || '').trim();
+      var autoQuery = '';
+
+      if (t && ar) {
+        autoQuery = t + ' ' + ar;
+      } else if (t) {
+        autoQuery = t;
+      } else {
+        // Derive from filename: strip extension, normalize separators, remove common noise
+        autoQuery = file.name
+          .replace(/\.mp3$/i, '')
+          .replace(/[_]+/g, ' ')
+          .replace(/\s*[\(\[]\s*(official\s*(video|audio|lyric|music|hd)?|video|audio|lyrics|hd|4k|ft\.?|feat\.?|remaster\w*|explicit)[^\)\]]*[\)\]]/gi, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      }
+
+      if (autoQuery) {
+        var aqEl = document.getElementById('autofillQuery');
+        if (aqEl) aqEl.value = autoQuery;
+        // Short delay so the panel finishes animating in before fetch starts
+        setTimeout(function() {
+          var btn = document.getElementById('autofillBtn');
+          if (btn && !btn.disabled) btn.click();
+        }, 420);
+      }
+    })();
   } catch(e) {
     setStatus('Error loading file: ' + e.message, 'err');
     editorPanel.classList.add('hidden');
@@ -776,7 +854,7 @@ async function buildAndDownload() {
 
     writer.addTag();
     var blob = writer.getBlob();
-    var name = (gv('outFilename') || 'track_tagged') + '.mp3';
+    var name = (gv('outFilename') || '') + '.mp3';
     downloadBlob(blob, name);
     setStatus('✅ ' + name + ' downloaded!', 'ok');
   } catch(e) {
@@ -825,6 +903,245 @@ artInput.addEventListener('change', function(e){
 
 document.getElementById('saveBtn').addEventListener('click', buildAndDownload);
 document.getElementById('resetBtn').addEventListener('click', resetTags);
+
+// ── Auto-fill from Internet (iTunes + Deezer fallback + MusicBrainz composer) ─
+// Uses only free, CORS-enabled public APIs — no API key needed.
+(function() {
+  var autofillBtn    = document.getElementById('autofillBtn');
+  var autofillQuery  = document.getElementById('autofillQuery');
+  var autofillStatus = document.getElementById('autofillStatus');
+
+  function setAFStatus(type, icon, html) {
+    autofillStatus.style.display = 'flex';
+    if (type === 'loading') {
+      autofillStatus.innerHTML = '<div class="as-spinner"></div><span class="as-text">' + html + '</span>';
+    } else {
+      autofillStatus.innerHTML = '<span class="as-icon">' + icon + '</span><span class="as-text ' + type + '">' + html + '</span>';
+    }
+  }
+
+  autofillQuery.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') autofillBtn.click();
+  });
+
+  // ── Apply artwork URL to the cover panel ─────────────────────────────────────
+  // Fetches the image bytes so they land in S.coverData and get embedded on save.
+  function applyCoverArt(url) {
+    if (!url) return;
+    var img    = document.getElementById('coverImg');
+    var noneEl = document.getElementById('coverNone');
+
+    fetch(url)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var mime = (res.headers.get('content-type') || 'image/jpeg').split(';')[0].trim();
+        return res.arrayBuffer().then(function(buf) { return { buf: buf, mime: mime }; });
+      })
+      .then(function(result) {
+        // Store bytes in state so buildAndDownload can embed them
+        S.coverData    = new Uint8Array(result.buf);
+        S.coverMime    = result.mime;
+        S.newCoverFile = null;
+        // Revoke old blob URL and display new one
+        if (S.blobUrl) { URL.revokeObjectURL(S.blobUrl); S.blobUrl = null; }
+        var blobUrl = URL.createObjectURL(new Blob([S.coverData], { type: S.coverMime }));
+        S.blobUrl = blobUrl;
+        img.src = blobUrl;
+        img.style.display = 'block';
+        if (noneEl) noneEl.style.display = 'none';
+      })
+      .catch(function(err) {
+        console.warn('applyCoverArt fetch failed:', err);
+        // Display-only fallback — won't embed on save but at least shows art
+        img.src = url;
+        img.style.display = 'block';
+        if (noneEl) noneEl.style.display = 'none';
+      });
+  }
+
+  // ── iTunes Search API ────────────────────────────────────────────────────────
+  async function fetchITunes(query) {
+    var url = 'https://itunes.apple.com/search?' + new URLSearchParams({
+      term: query, media: 'music', entity: 'song', limit: '5'
+    });
+    var res = await fetch(url);
+    if (!res.ok) throw new Error('iTunes ' + res.status);
+    var data = await res.json();
+    return (data.results || [])[0] || null;
+  }
+
+  // ── Deezer Search API (fallback — CORS-open, no key) ─────────────────────────
+  async function fetchDeezer(query) {
+    var url = 'https://api.deezer.com/search?q=' + encodeURIComponent(query) + '&limit=1&output=jsonp';
+    // Deezer requires JSONP for browser use; wrap it in a promise
+    return new Promise(function(resolve) {
+      var cb = 'dz_' + Date.now();
+      var script = document.createElement('script');
+      var timer = setTimeout(function() {
+        delete window[cb];
+        document.head.removeChild(script);
+        resolve(null);
+      }, 6000);
+      window[cb] = function(data) {
+        clearTimeout(timer);
+        delete window[cb];
+        document.head.removeChild(script);
+        resolve((data.data || [])[0] || null);
+      };
+      script.src = 'https://api.deezer.com/search?q=' + encodeURIComponent(query) + '&limit=1&output=jsonp&callback=' + cb;
+      document.head.appendChild(script);
+    });
+  }
+
+  // ── MusicBrainz: search recording ID (no custom User-Agent — browsers block it) ──
+  async function fetchMBRecordingId(title, artist) {
+    var q = encodeURIComponent('recording:"' + title + '" AND artist:"' + artist + '"');
+    var url = 'https://musicbrainz.org/ws/2/recording?query=' + q + '&limit=1&fmt=json';
+    var res = await fetch(url);
+    if (!res.ok) return null;
+    var data = await res.json();
+    var recs = data.recordings || [];
+    return recs.length ? recs[0].id : null;
+  }
+
+  // ── MusicBrainz: composer from recording detail ───────────────────────────────
+  async function fetchMBDetail(mbid) {
+    var url = 'https://musicbrainz.org/ws/2/recording/' + mbid + '?inc=artist-rels+work-rels+works&fmt=json';
+    var res = await fetch(url);
+    if (!res.ok) return {};
+    var data = await res.json();
+    var composer = '';
+    (data.relations || []).forEach(function(rel) {
+      if (rel.type === 'performance' && rel.work) {
+        (rel.work.relations || []).forEach(function(wr) {
+          if ((wr.type === 'composer' || wr.type === 'lyricist') && wr.artist && !composer) {
+            composer = wr.artist.name;
+          }
+        });
+      }
+    });
+    return { composer: composer };
+  }
+
+  // ── Main handler ─────────────────────────────────────────────────────────────
+  autofillBtn.addEventListener('click', async function() {
+    var query = autofillQuery.value.trim();
+    if (!query) {
+      setAFStatus('err', '⚠', 'Enter a song name — e.g. "Bohemian Rhapsody Queen"');
+      return;
+    }
+
+    autofillBtn.disabled = true;
+    setAFStatus('loading', '', 'Searching music catalog…');
+
+    try {
+      var meta = {};
+      var artworkUrl = '';
+
+      // ── Step 1: iTunes (primary) ────────────────────────────────────────────
+      var iTunesOk = false;
+      try {
+        var track = await fetchITunes(query);
+        if (track) {
+          iTunesOk = true;
+          meta.title       = track.trackName        || '';
+          meta.artist      = track.artistName       || '';
+          meta.album       = track.collectionName   || '';
+          meta.albumArtist = track.artistName       || '';
+          meta.genre       = track.primaryGenreName || '';
+          meta.copyright   = track.copyright || (track.releaseDate ? '© ' + track.releaseDate.substring(0,4) + ' ' + (track.artistName || '') : '');
+          if (track.releaseDate) meta.year = track.releaseDate.substring(0, 4);
+          if (track.trackNumber) meta.track = track.trackCount ? track.trackNumber + '/' + track.trackCount : String(track.trackNumber);
+          if (track.discNumber)  meta.disc  = track.discCount  ? track.discNumber  + '/' + track.discCount  : String(track.discNumber);
+          // FIX: extract artwork URL and upgrade to high-res
+          artworkUrl = (track.artworkUrl100 || '').replace('100x100bb', '600x600bb');
+        }
+      } catch(iTunesErr) {
+        console.warn('iTunes lookup failed, trying Deezer…', iTunesErr);
+      }
+
+      // ── Step 2: Deezer fallback if iTunes failed or returned nothing ─────────
+      if (!iTunesOk) {
+        setAFStatus('loading', '', 'iTunes unavailable — trying Deezer…');
+        try {
+          var dz = await fetchDeezer(query);
+          if (dz) {
+            meta.title       = dz.title                   || '';
+            meta.artist      = (dz.artist && dz.artist.name) || '';
+            meta.album       = (dz.album  && dz.album.title) || '';
+            meta.albumArtist = meta.artist;
+            artworkUrl       = (dz.album  && dz.album.cover_xl) || (dz.album && dz.album.cover_big) || '';
+          }
+        } catch(dzErr) {
+          console.warn('Deezer lookup failed:', dzErr);
+        }
+      }
+
+      if (!meta.title && !meta.artist) {
+        setAFStatus('err', '⚠', 'No results found. Try adding the artist name, e.g. "Shape of You Ed Sheeran".');
+        autofillBtn.disabled = false;
+        return;
+      }
+
+      // ── Step 3: Apply cover art immediately ─────────────────────────────────
+      if (artworkUrl) applyCoverArt(artworkUrl);
+
+      // ── Step 4: MusicBrainz for composer (best-effort) ──────────────────────
+      if (meta.title && meta.artist) {
+        setAFStatus('loading', '', 'Fetching composer from MusicBrainz…');
+        try {
+          // Rate-limit: wait 1 s to respect MusicBrainz policy
+          await new Promise(function(r){ setTimeout(r, 1000); });
+          var mbid = await fetchMBRecordingId(meta.title, meta.artist);
+          if (mbid) {
+            await new Promise(function(r){ setTimeout(r, 1000); });
+            var mbDetail = await fetchMBDetail(mbid);
+            if (mbDetail.composer) meta.composer = mbDetail.composer;
+          }
+        } catch(mbErr) {
+          console.warn('MusicBrainz lookup failed (non-fatal):', mbErr);
+        }
+      }
+
+      // ── Step 5: Fill the form ────────────────────────────────────────────────
+      var filled = [];
+      function tryFill(id, key, label) {
+        var val = (meta[key] || '').toString().trim();
+        if (val) { sv(id, val); filled.push(label); }
+      }
+
+      tryFill('inpTitle',       'title',       'Title');
+      tryFill('inpArtist',      'artist',      'Artist');
+      tryFill('inpAlbum',       'album',       'Album');
+      tryFill('inpYear',        'year',        'Year');
+      tryFill('inpTrack',       'track',       'Track');
+      tryFill('inpGenre',       'genre',       'Genre');
+      tryFill('inpAlbumArtist', 'albumArtist', 'Album Artist');
+      tryFill('inpComposer',    'composer',    'Composer');
+      tryFill('inpDisc',        'disc',        'Disc');
+      tryFill('inpCopyright',   'copyright',   'Copyright');
+
+      // Update cover panel text
+      if (meta.title) g('coverTitle').textContent = meta.title.toUpperCase();
+      if (meta.artist || meta.album) {
+        g('coverSub').textContent = meta.artist + (meta.album ? ' · ' + meta.album : '');
+      }
+
+      if (filled.length === 0) {
+        setAFStatus('err', '⚠', 'Song found but no metadata could be parsed. Try a more specific query.');
+      } else {
+        var chips = filled.map(function(f){ return '<span class="field-chip">'+f+'</span>'; }).join('');
+        setAFStatus('ok', '✅', 'Filled ' + filled.length + ' fields: <span style="display:inline-flex;flex-wrap:wrap;gap:0.3rem;margin-left:0.3rem">' + chips + '</span>');
+      }
+
+    } catch(err) {
+      console.error('AutoFill error:', err);
+      setAFStatus('err', '✕', 'Lookup failed: ' + err.message + '. Check your internet connection.');
+    } finally {
+      autofillBtn.disabled = false;
+    }
+  });
+})();
 
 })();
 </script>
