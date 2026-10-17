@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>TagMP3 · Offline ID3 Tag Editor</title>
+  <title>TagMP3 · Offline MP3 &amp; FLAC Tag Editor</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <!-- ID3v2 writer (jsdelivr is more reliable than unpkg) -->
@@ -122,6 +122,12 @@
     .info-key{font-size:0.55rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim)}
     .info-val{color:var(--accent);font-weight:600;font-size:0.72rem}
 
+    /* LYRICS */
+    .lyrics-source{margin-left:auto;font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;padding:0.18rem 0.55rem;border-radius:2px;background:rgba(0,255,127,0.08);border:1px solid rgba(0,255,127,0.22);color:var(--accent);font-weight:600}
+    .lyrics-text{resize:vertical;min-height:160px;line-height:1.65;font-family:var(--mono);font-size:0.75rem;white-space:pre-wrap;background:var(--surface3);border:1px solid rgba(255,255,255,0.07);border-radius:4px;padding:0.7rem 0.85rem;color:var(--text);width:100%;transition:border-color .2s,box-shadow .2s}
+    .lyrics-text:focus{outline:none;border-color:rgba(0,255,127,0.32);box-shadow:0 0 0 3px rgba(0,255,127,0.065)}
+    .lyrics-text::placeholder{color:var(--text-dim);font-style:italic}
+
     /* ACTIONS */
     .form-footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:0.4rem}
     #editorStatus{font-size:0.69rem;color:var(--text-mid);flex:1;min-width:0}
@@ -196,18 +202,18 @@
   <header class="header">
     <div class="term-line">
       <div class="term-dot"></div>
-      <span class="term-text">$ tagmp3 <span class="hl">--offline</span> --id3v2 --write <span class="hl">*.mp3</span></span>
+      <span class="term-text">$ tagmp3 <span class="hl">--offline</span> --id3v2 --vorbis --write <span class="hl">*.mp3 *.flac</span></span>
     </div>
     <div class="brand-row">
       <h1 class="brand-title">Tag<span class="ac">MP3</span></h1>
       <div class="brand-badges">
         <span class="pill pill-g">100% Offline</span>
-        <span class="pill pill-b">ID3v2 Tags</span>
+        <span class="pill pill-b">MP3 + FLAC</span>
         <span class="pill pill-b">Cover Art</span>
         <span class="pill pill-g">AI Auto-fill</span>
       </div>
     </div>
-    <p class="brand-desc">Edit ID3v2 metadata — title, artist, album, artwork &amp; more — completely client-side. Auto-fill any song's tags instantly via AI-powered internet search.</p>
+    <p class="brand-desc">Edit MP3 ID3v2 or FLAC Vorbis tags — title, artist, album, artwork &amp; more — completely client-side. Auto-fill any song's tags instantly via AI-powered internet search.</p>
   </header>
 
   <div class="divider"></div>
@@ -232,7 +238,7 @@
       <div class="tc-icon-ring">
         <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       </div>
-      <div class="tc-meta"><span class="tc-name">TagMP3</span><span class="tc-desc">ID3 metadata editor</span></div>
+      <div class="tc-meta"><span class="tc-name">TagMP3</span><span class="tc-desc">MP3 &amp; FLAC metadata editor</span></div>
       <span class="tc-arrow">✦</span>
     </div>
   </div>
@@ -246,10 +252,10 @@
         <line x1="12" y1="3" x2="12" y2="15"/>
       </svg>
     </div>
-    <span class="upload-label">Drop your MP3 file here</span>
+    <span class="upload-label">Drop your MP3 or FLAC file here</span>
     <span class="upload-hint">or click to browse &nbsp;&middot;&nbsp; edit tags 100% offline</span>
   </div>
-  <input type="file" id="mp3Input" accept="audio/mpeg,.mp3" class="hidden">
+  <input type="file" id="mp3Input" accept="audio/mpeg,.mp3,audio/flac,audio/x-flac,.flac" class="hidden">
   <input type="file" id="artInput" accept="image/jpeg,image/png,image/webp" class="hidden">
 
   <div id="globalLoader" class="hidden">
@@ -343,6 +349,22 @@
       </div>
     </div>
 
+    <!-- Lyrics -->
+    <div class="panel" id="lyricsPanel">
+      <div class="panel-head">
+        <div class="ph-dot"></div>
+        <span class="panel-label">Lyrics</span>
+        <span class="lyrics-source" id="lyricsSource" style="display:none"></span>
+      </div>
+      <div class="panel-body">
+        <div class="form-grid">
+          <div class="fgroup"><label>Language</label><input id="inpLyricsLang" type="text" class="form-control" placeholder="eng" maxlength="3"></div>
+          <div class="fgroup"><label>Description</label><input id="inpLyricsDesc" type="text" class="form-control" placeholder="(optional)"></div>
+          <div class="fgroup full"><label>Lyrics Text</label><textarea id="inpLyrics" class="lyrics-text" rows="9" placeholder="Lyrics appear here when the file has them. Edit freely — saved back to the file on export."></textarea></div>
+        </div>
+      </div>
+    </div>
+
     <!-- File info -->
     <div class="panel">
       <div class="panel-head"><div class="ph-dot"></div><span class="panel-label">File Info</span></div>
@@ -366,7 +388,7 @@
           <label>Output Filename</label>
           <div class="filename-row">
             <input id="outFilename" type="text" class="filename-input" placeholder="track">
-            <span class="filename-ext">.mp3</span>
+            <span class="filename-ext" id="outFilenameExt">.mp3</span>
           </div>
         </div>
         <div class="form-footer">
@@ -382,7 +404,7 @@
   </div><!-- /editorPanel -->
 
   <footer class="footer">
-    <div class="footer-l">TagMP3 &nbsp;<span>·</span>&nbsp; offline id3 editor</div>
+    <div class="footer-l">TagMP3 &nbsp;<span>·</span>&nbsp; offline mp3 + flac editor</div>
     <div class="footer-r">no server &nbsp;·&nbsp; no upload &nbsp;·&nbsp; client-side only</div>
   </footer>
 </div><!-- /shell -->
@@ -610,11 +632,482 @@ function parseFrame(id, data, out, ver) {
     }
     return;
   }
+
+  // Unsynchronized lyrics: USLT (v2.3/v2.4) / ULT (v2.2)
+  // Layout: [enc:1][language:3][description ...null][lyrics text]
+  // The "description" terminator depends on encoding (1 or 2 bytes). The
+  // lyrics text follows immediately. We preserve the first USLT frame and
+  // re-emit it on save via writer.setFrame('USLT', ...).
+  if (id === 'USLT' || id === 'ULT') {
+    if (out.lyrics) return;  // first one wins
+    if (data.length < 4) return;
+    var enc = data[0];
+    var language = String.fromCharCode(data[1], data[2], data[3]).toLowerCase();
+    var pos = 4;
+    // Skip description (text up to null terminator)
+    var descStart = pos;
+    pos = skipNull(data, pos, enc);
+    var descBytes = data.slice(descStart, pos - ((enc === 1 || enc === 2) ? 2 : 1));
+    var description = decodeText(descBytes, enc).replace(/\0/g, '').trim();
+    // The rest is the lyrics text
+    var lyricsBytes = data.slice(pos);
+    var lyricsText = decodeText(lyricsBytes, enc).replace(/\0/g, '').trim();
+    if (lyricsText) {
+      // field: 'USLT' lets buildVorbisComment / UI code tell this apart from a FLAC
+      // Vorbis LYRICS field. We normalize the shape so the rest of the app can
+      // treat MP3 and FLAC lyrics identically.
+      out.lyrics = { field: 'USLT', language: language, description: description, text: lyricsText };
+    }
+    return;
+  }
 }
+
+
+// ── FLAC parsing & writing ──────────────────────────────────────────────────
+// FLAC uses raw metadata blocks (NOT ID3). The blocks we care about:
+//   - STREAMINFO  (type 0) — mandatory, contains sample rate, channels, bps, total samples
+//   - VORBIS_COMMENT (type 4) — title, artist, album, etc. (LE-length-prefixed UTF-8)
+//   - PICTURE (type 6) — cover art (BE-length-prefixed)
+// Audio data follows the last metadata block (flagged with bit 7 set in the header byte).
+// Metadata blocks are uncompressed, so we can splice/replace them in place.
+
+function readUint32LE(bytes, off) {
+  return (bytes[off]) | (bytes[off+1]<<8) | (bytes[off+2]<<16) | ((bytes[off+3]<<24) >>> 0);
+}
+function readUint32BE(bytes, off) {
+  return (((bytes[off]<<24) >>> 0) | (bytes[off+1]<<16) | (bytes[off+2]<<8) | bytes[off+3]) >>> 0;
+}
+function writeUint32LE(arr, off, val) {
+  arr[off]   = val & 0xff;
+  arr[off+1] = (val >>> 8) & 0xff;
+  arr[off+2] = (val >>> 16) & 0xff;
+  arr[off+3] = (val >>> 24) & 0xff;
+}
+function writeUint32BE(arr, off, val) {
+  arr[off]   = (val >>> 24) & 0xff;
+  arr[off+1] = (val >>> 16) & 0xff;
+  arr[off+2] = (val >>> 8) & 0xff;
+  arr[off+3] = val & 0xff;
+}
+
+function utf8Encode(str) {
+  if (window.TextEncoder) return new TextEncoder().encode(str);
+  // Fallback: simple UTF-8 encoder
+  var bytes = [];
+  for (var i = 0; i < str.length; i++) {
+    var c = str.charCodeAt(i);
+    if (c < 0x80) bytes.push(c);
+    else if (c < 0x800) {
+      bytes.push(0xc0 | (c >> 6));
+      bytes.push(0x80 | (c & 0x3f));
+    } else {
+      bytes.push(0xe0 | (c >> 12));
+      bytes.push(0x80 | ((c >> 6) & 0x3f));
+      bytes.push(0x80 | (c & 0x3f));
+    }
+  }
+  return new Uint8Array(bytes);
+}
+
+function utf8Decode(bytes) {
+  if (window.TextDecoder) return new TextDecoder('utf-8').decode(bytes);
+  var s = '';
+  for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return s;
+}
+
+// ── Map a Vorbis comment field to our internal key ───────────────────────────
+function mapVorbisField(field, value, out) {
+  field = field.toUpperCase();
+  // First occurrence wins (matches MP3 behavior)
+  function setIfEmpty(key, v) { if (!out[key]) out[key] = v; }
+  switch (field) {
+    case 'TITLE':         setIfEmpty('title', value); break;
+    case 'ARTIST':        setIfEmpty('artist', value); break;
+    case 'ALBUM':         setIfEmpty('album', value); break;
+    case 'ALBUMARTIST':
+    case 'ALBUM ARTIST':
+    case 'ALBUM_ARTIST':  setIfEmpty('albumArtist', value); break;
+    case 'DATE':
+    case 'YEAR':          setIfEmpty('year', value.length >= 4 ? value.substring(0,4) : value); break;
+    case 'TRACKNUMBER':
+      // Could be just "3" — TRACKTOTAL (separate field) gives the "/N" part
+      if (!out.track) {
+        out.track = value;
+        // If we already saw TRACKTOTAL, combine
+        if (out._trackTotal) out.track = value + '/' + out._trackTotal;
+      }
+      break;
+    case 'TRACKTOTAL':    out._trackTotal = value; break;
+    case 'GENRE':         setIfEmpty('genre', value); break;
+    case 'COMMENT':
+    case 'DESCRIPTION':  setIfEmpty('comment', value); break;
+    case 'COMPOSER':      setIfEmpty('composer', value); break;
+    case 'DISCNUMBER':
+      if (!out.disc) {
+        out.disc = value;
+        if (out._discTotal) out.disc = value + '/' + out._discTotal;
+      }
+      break;
+    case 'DISCTOTAL':    out._discTotal = value; break;
+    case 'BPM':           setIfEmpty('bpm', value); break;
+    case 'COPYRIGHT':     setIfEmpty('copyright', value); break;
+    // Lyrics: take the first LYRICS or UNSYNCEDLYRICS field. Track the source
+    // field name so we can write back to the same field on save.
+    case 'LYRICS':
+    case 'UNSYNCEDLYRICS':
+      if (!out.lyrics) {
+        out.lyrics = { field: field, language: '', description: '', text: value };
+      }
+      break;
+  }
+}
+
+// ── Parse a FLAC file ────────────────────────────────────────────────────────
+// Returns an object with the same shape as parseID3():
+//   { title, artist, album, ..., picture: {data, mime}, _streamInfo: {...}, _found: 'flac' }
+// Returns null if buffer is not a valid FLAC file.
+function parseFlac(buffer) {
+  var bytes = new Uint8Array(buffer);
+  if (bytes.length < 8) return null;
+  // Magic: "fLaC" (uppercase C = 0x43)
+  if (bytes[0] !== 0x66 || bytes[1] !== 0x4c || bytes[2] !== 0x61 || bytes[3] !== 0x43) {
+    return null;
+  }
+
+  var result = {};
+  var pos = 4;
+  var lastBlock = false;
+  var maxIter = 128;
+
+  while (!lastBlock && pos + 4 <= bytes.length && maxIter-- > 0) {
+    var headerByte = bytes[pos];
+    lastBlock = (headerByte & 0x80) !== 0;
+    var blockType = headerByte & 0x7f;
+    var blockLen = (bytes[pos+1] << 16) | (bytes[pos+2] << 8) | bytes[pos+3];
+    pos += 4;
+    if (pos + blockLen > bytes.length) break;  // truncated
+
+    if (blockType === 0 && blockLen >= 18) {
+      // STREAMINFO: 2+2+3+3 = 10 bytes of block/frame sizes, then 8 bytes of stream info, then 16 bytes MD5
+      var b10 = bytes[pos+10], b11 = bytes[pos+11], b12 = bytes[pos+12], b13 = bytes[pos+13];
+      var sampleRate = (b10 << 12) | (b11 << 4) | (b12 >> 4);
+      var channels   = ((b12 & 0x0e) >> 1) + 1;
+      var bps        = (((b12 & 0x01) << 4) | (b13 >> 4)) + 1;
+      var tsHi       = (b13 & 0x0f);
+      var tsLo       = readUint32BE(bytes, pos + 14);
+      var totalSamples = tsHi * 4294967296 + tsLo;
+
+      result._streamInfo = {
+        sampleRate:    sampleRate,
+        channels:      channels,
+        bitsPerSample: bps,
+        totalSamples:  totalSamples
+      };
+    } else if (blockType === 4) {
+      // VORBIS_COMMENT (little-endian lengths, UTF-8 contents)
+      var off = pos;
+      var vendorLen = readUint32LE(bytes, off); off += 4 + vendorLen;
+      if (off + 4 > bytes.length) break;
+      var commentCount = readUint32LE(bytes, off); off += 4;
+      var allComments = [];
+      for (var i = 0; i < commentCount; i++) {
+        if (off + 4 > bytes.length) break;
+        var cLen = readUint32LE(bytes, off); off += 4;
+        if (off + cLen > bytes.length) break;
+        var comment = utf8Decode(bytes.slice(off, off + cLen));
+        off += cLen;
+        var eq = comment.indexOf('=');
+        if (eq > 0) {
+          var fName = comment.substring(0, eq);
+          var fValue = comment.substring(eq + 1);
+          allComments.push({ field: fName, value: fValue });
+          mapVorbisField(fName, fValue, result);
+        }
+      }
+      // Preserve ALL raw comments so we can keep unknown fields (LYRICS,
+      // UNSYNCEDLYRICS, LANGUAGE, ENCODED_BY, etc.) when re-writing the file.
+      result._allComments = allComments;
+      // Combine TRACKNUMBER + TRACKTOTAL if both were found
+      if (result.track && result._trackTotal && result.track.indexOf('/') < 0) {
+        result.track = result.track + '/' + result._trackTotal;
+      }
+      if (result.disc && result._discTotal && result.disc.indexOf('/') < 0) {
+        result.disc = result.disc + '/' + result._discTotal;
+      }
+    } else if (blockType === 6) {
+      // PICTURE (big-endian lengths)
+      var off = pos;
+      var picType = readUint32BE(bytes, off); off += 4;
+      var mimeLen = readUint32BE(bytes, off); off += 4;
+      var mime = '';
+      for (var j = 0; j < mimeLen; j++) mime += String.fromCharCode(bytes[off + j]);
+      off += mimeLen;
+      var descLen = readUint32BE(bytes, off); off += 4;
+      off += descLen;  // skip description
+      off += 16;       // skip width, height, depth, indexed (4x4 bytes)
+      var dataLen = readUint32BE(bytes, off); off += 4;
+      // Take the first picture, but prefer type 3 (front cover) if it appears later
+      if (!result.picture || (picType === 3 && result._picType !== 3)) {
+        result.picture = {
+          data: bytes.slice(off, off + dataLen),
+          mime: mime || 'image/jpeg'
+        };
+        result._picType = picType;
+      }
+    }
+    // Skip padding/application/seektable/cuesheet — we preserve or drop them on write
+
+    pos += blockLen;
+  }
+
+  if (!result._streamInfo) return null;  // STREAMINFO is mandatory
+  result._found = 'flac';
+  return result;
+}
+
+// ── Known Vorbis comment fields (everything we expose in the UI) ────────────
+// Anything NOT in this list is preserved verbatim from the original file so
+// we never drop fields like LYRICS, UNSYNCEDLYRICS, LANGUAGE, ENCODED_BY,
+// MUSICBRAINZ_*, etc.
+var VORBIS_KNOWN_FIELDS = {
+  TITLE: 'title',
+  ARTIST: 'artist',
+  ALBUM: 'album',
+  ALBUMARTIST: 'albumArtist',
+  'ALBUM ARTIST': 'albumArtist',
+  'ALBUM_ARTIST': 'albumArtist',
+  DATE: 'year',
+  YEAR: 'year',
+  TRACKNUMBER: 'track',
+  TRACKTOTAL: '_trackTotal',
+  GENRE: 'genre',
+  COMMENT: 'comment',
+  DESCRIPTION: 'comment',
+  COMPOSER: 'composer',
+  DISCNUMBER: 'disc',
+  DISCTOTAL: '_discTotal',
+  BPM: 'bpm',
+  COPYRIGHT: 'copyright',
+  // Lyrics fields are managed by the UI too — filter them out of the
+  // original-comments preservation list so we can write back the user's
+  // edited version (and drop them entirely if the user cleared the textarea).
+  LYRICS: 'lyrics',
+  UNSYNCEDLYRICS: 'lyrics'
+};
+
+// ── Build a VORBIS_COMMENT block from our tag object ─────────────────────────
+// `originalComments` (optional) = array of { field, value } from the parsed file.
+// Unknown fields (LYRICS, etc.) are preserved; known fields are driven by `tags`
+// (the user's edits) — empty values cause the field to be dropped.
+function buildVorbisComment(tags, originalComments) {
+  var comments = [];
+  function add(field, value) {
+    if (value != null) {
+      value = String(value).trim();
+      if (value) comments.push(field + '=' + value);
+    }
+  }
+
+  add('TITLE',       tags.title);
+  add('ARTIST',      tags.artist);
+  add('ALBUM',       tags.album);
+  add('ALBUMARTIST', tags.albumArtist);
+  add('DATE',        tags.year);
+
+  // Track number: split "3/12" form into TRACKNUMBER + TRACKTOTAL for max compatibility
+  if (tags.track) {
+    var t = String(tags.track);
+    var slash = t.indexOf('/');
+    if (slash > 0) {
+      add('TRACKNUMBER', t.substring(0, slash));
+      add('TRACKTOTAL',   t.substring(slash + 1));
+    } else {
+      add('TRACKNUMBER', t);
+    }
+  }
+
+  add('GENRE',       tags.genre);
+  add('COMMENT',     tags.comment);
+  add('COMPOSER',    tags.composer);
+
+  if (tags.disc) {
+    var d = String(tags.disc);
+    var slash = d.indexOf('/');
+    if (slash > 0) {
+      add('DISCNUMBER', d.substring(0, slash));
+      add('DISCTOTAL',   d.substring(slash + 1));
+    } else {
+      add('DISCNUMBER', d);
+    }
+  }
+
+  add('BPM',         tags.bpm);
+  add('COPYRIGHT',   tags.copyright);
+
+  // ── Lyrics: write back to the same field the lyrics came from. ──
+  // If the user cleared the textarea, no LYRICS field is written (lyrics are
+  // removed). If they edited the text, the edited version replaces the
+  // original. The original field is filtered out of `originalComments` below
+  // because LYRICS/UNSYNCEDLYRICS are in VORBIS_KNOWN_FIELDS.
+  if (tags.lyrics && tags.lyrics.text && String(tags.lyrics.text).trim()) {
+    var lyricsField = (tags.lyrics.field === 'UNSYNCEDLYRICS') ? 'UNSYNCEDLYRICS' : 'LYRICS';
+    comments.push(lyricsField + '=' + tags.lyrics.text);
+  }
+
+  // ── Preserve unknown fields from the original file (LANGUAGE, etc.) ──
+  // Build a set of canonical uppercase field names we've already written, so we
+  // don't duplicate them. Then walk the original comments and keep any field
+  // that isn't in our known-fields list (i.e. we don't manage it in the UI).
+  var writtenFields = {};
+  for (var i = 0; i < comments.length; i++) {
+    var eq = comments[i].indexOf('=');
+    writtenFields[comments[i].substring(0, eq).toUpperCase()] = true;
+  }
+  if (originalComments && originalComments.length) {
+    for (var i = 0; i < originalComments.length; i++) {
+      var f = originalComments[i].field;
+      var v = originalComments[i].value;
+      var fUpper = f.toUpperCase();
+      // Skip fields we manage in the UI — those are driven by `tags` above.
+      if (VORBIS_KNOWN_FIELDS[fUpper]) continue;
+      // Skip duplicates of unknown fields we've already preserved (first wins).
+      if (writtenFields[fUpper]) continue;
+      writtenFields[fUpper] = true;
+      comments.push(f + '=' + v);
+    }
+  }
+
+  var vendorStr = 'TagMP3 FLAC tag editor';
+  var vendorBytes = utf8Encode(vendorStr);
+
+  // Compute total length
+  var totalLen = 4 + vendorBytes.length + 4;
+  var commentBytes = [];
+  for (var i = 0; i < comments.length; i++) {
+    var cb = utf8Encode(comments[i]);
+    commentBytes.push(cb);
+    totalLen += 4 + cb.length;
+  }
+
+  var out = new Uint8Array(totalLen);
+  var pos = 0;
+  writeUint32LE(out, pos, vendorBytes.length); pos += 4;
+  out.set(vendorBytes, pos); pos += vendorBytes.length;
+  writeUint32LE(out, pos, comments.length);   pos += 4;
+  for (var i = 0; i < commentBytes.length; i++) {
+    writeUint32LE(out, pos, commentBytes[i].length); pos += 4;
+    out.set(commentBytes[i], pos); pos += commentBytes[i].length;
+  }
+  return out;
+}
+
+// ── Build a PICTURE block ────────────────────────────────────────────────────
+function buildPictureBlock(data, mime, description) {
+  description = description || 'Cover';
+  var descBytes = utf8Encode(description);
+  var mimeBytes = utf8Encode(mime || 'image/jpeg');
+
+  var totalLen = 4 + 4 + mimeBytes.length + 4 + descBytes.length + 16 + 4 + data.length;
+  var out = new Uint8Array(totalLen);
+  var pos = 0;
+  writeUint32BE(out, pos, 3); pos += 4;                    // picture type = front cover
+  writeUint32BE(out, pos, mimeBytes.length); pos += 4;
+  out.set(mimeBytes, pos); pos += mimeBytes.length;
+  writeUint32BE(out, pos, descBytes.length); pos += 4;
+  out.set(descBytes, pos); pos += descBytes.length;
+  writeUint32BE(out, pos, 0); pos += 4;  // width
+  writeUint32BE(out, pos, 0); pos += 4;  // height
+  writeUint32BE(out, pos, 0); pos += 4;  // color depth
+  writeUint32BE(out, pos, 0); pos += 4;  // indexed colors
+  writeUint32BE(out, pos, data.length); pos += 4;
+  out.set(data, pos);
+  return out;
+}
+
+// ── Write a FLAC file with new tags + cover art ──────────────────────────────
+// Preserves STREAMINFO and any non-comment/non-picture/non-padding blocks
+// (seektable, application, cuesheet). Drops padding to keep the file lean.
+// Unknown Vorbis comment fields (LYRICS, LANGUAGE, etc.) are preserved by
+// passing `originalComments` through to buildVorbisComment.
+function writeFlac(buffer, tags, coverData, coverMime, originalComments) {
+  var bytes = new Uint8Array(buffer);
+  if (bytes.length < 8) throw new Error('FLAC file too small');
+  if (bytes[0] !== 0x66 || bytes[1] !== 0x4c || bytes[2] !== 0x61 || bytes[3] !== 0x43) {
+    throw new Error('Not a valid FLAC file');
+  }
+
+  // Walk metadata blocks, collect STREAMINFO and "others" (skip VORBIS_COMMENT, PICTURE, PADDING)
+  var pos = 4;
+  var streamInfoBlock = null;
+  var otherBlocks = [];
+  var audioStart = -1;
+
+  while (pos + 4 <= bytes.length) {
+    var headerByte = bytes[pos];
+    var lastBlock = (headerByte & 0x80) !== 0;
+    var blockType = headerByte & 0x7f;
+    var blockLen = (bytes[pos+1] << 16) | (bytes[pos+2] << 8) | bytes[pos+3];
+
+    if (blockType === 0) {
+      streamInfoBlock = bytes.slice(pos + 4, pos + 4 + blockLen);
+    } else if (blockType !== 4 && blockType !== 6 && blockType !== 1) {
+      // Preserve SEEKTABLE (3), APPLICATION (2), CUESHEET (5), etc.
+      otherBlocks.push({ type: blockType, data: bytes.slice(pos + 4, pos + 4 + blockLen) });
+    }
+
+    pos += 4 + blockLen;
+    if (lastBlock) { audioStart = pos; break; }
+  }
+
+  if (!streamInfoBlock) throw new Error('No STREAMINFO block found');
+  if (audioStart < 0) throw new Error('Truncated FLAC — no audio data found');
+  var audioData = bytes.slice(audioStart);
+
+  // Build new VORBIS_COMMENT block — pass original comments so we can preserve
+  // unknown fields (LYRICS, UNSYNCEDLYRICS, LANGUAGE, ENCODED_BY, etc.).
+  var vcBlock = buildVorbisComment(tags, originalComments);
+
+  // Assemble block list: STREAMINFO, VORBIS_COMMENT, [PICTURE], others...
+  var blockList = [
+    { type: 0, data: streamInfoBlock },
+    { type: 4, data: vcBlock }
+  ];
+  if (coverData && coverData.length > 0) {
+    blockList.push({ type: 6, data: buildPictureBlock(coverData, coverMime || 'image/jpeg', 'Cover') });
+  }
+  for (var i = 0; i < otherBlocks.length; i++) {
+    blockList.push(otherBlocks[i]);
+  }
+
+  // Compute total output size: 4 (magic) + sum(4 + block.length) + audioData.length
+  var totalSize = 4 + audioData.length;
+  for (var i = 0; i < blockList.length; i++) totalSize += 4 + blockList[i].data.length;
+
+  var output = new Uint8Array(totalSize);
+  var op = 0;
+  output[op++] = 0x66; output[op++] = 0x4c; output[op++] = 0x61; output[op++] = 0x43;  // "fLaC" (uppercase C = 0x43)
+
+  for (var i = 0; i < blockList.length; i++) {
+    var b = blockList[i];
+    var isLast = (i === blockList.length - 1);
+    output[op++] = (isLast ? 0x80 : 0x00) | (b.type & 0x7f);
+    output[op++] = (b.data.length >>> 16) & 0xff;
+    output[op++] = (b.data.length >>> 8) & 0xff;
+    output[op++] = b.data.length & 0xff;
+    output.set(b.data, op);
+    op += b.data.length;
+  }
+
+  output.set(audioData, op);
+  return new Blob([output], { type: 'audio/flac' });
+}
+
 
 // ── State ────────────────────────────────────────────────────────────────────
 var S = {
   file:         null,
+  fileType:     null,  // 'mp3' or 'flac'
   buffer:       null,
   origTags:     null,
   coverData:    null,  // Uint8Array of existing cover
@@ -709,6 +1202,27 @@ function populateForm(tags) {
     S.coverData = null;
     showCover(null);
   }
+
+  // Lyrics — populate the textarea + language + description, and show a
+  // source badge so the user knows where the lyrics came from.
+  var srcBadge = document.getElementById('lyricsSource');
+  if (tags.lyrics && tags.lyrics.text) {
+    sv('inpLyrics',     tags.lyrics.text);
+    sv('inpLyricsLang',  tags.lyrics.language || 'eng');
+    sv('inpLyricsDesc', tags.lyrics.description || '');
+    if (srcBadge) {
+      var srcLabel = (tags._found === 'flac')
+        ? ('FLAC · ' + (tags.lyrics.field || 'LYRICS'))
+        : ('MP3 · USLT · ' + (tags.lyrics.language || 'eng'));
+      srcBadge.textContent = srcLabel;
+      srcBadge.style.display = 'inline-block';
+    }
+  } else {
+    sv('inpLyrics',     '');
+    sv('inpLyricsLang',  'eng');
+    sv('inpLyricsDesc', '');
+    if (srcBadge) srcBadge.style.display = 'none';
+  }
 }
 
 // ── File info via <audio> element ─────────────────────────────────────────────
@@ -716,6 +1230,23 @@ function populateFileInfo(file) {
   g('iFile').textContent = file.name;
   g('iSize').textContent = fmtSize(file.size);
 
+  // ── FLAC: read everything we need from STREAMINFO (no decoding required) ──
+  if (S.origTags && S.origTags._streamInfo) {
+    var si = S.origTags._streamInfo;
+    if (si.sampleRate > 0 && si.totalSamples > 0) {
+      var dur = si.totalSamples / si.sampleRate;
+      g('iDuration').textContent  = fmtDur(dur);
+      g('iBitrate').textContent   = Math.round(file.size*8/dur/1000)+' kbps';
+    }
+    g('iSampleRate').textContent = si.sampleRate + ' Hz';
+    var chLabel = si.channels === 1 ? 'Mono'
+                : si.channels === 2 ? 'Stereo'
+                : (si.channels + ' ch');
+    g('iChannels').textContent   = chLabel + ' \u00B7 ' + si.bitsPerSample + '-bit';
+    return;
+  }
+
+  // ── MP3: <audio> for duration/bitrate, Web Audio for sample rate/channels ──
   var au = new Audio();
   var u  = URL.createObjectURL(file);
   au.src = u;
@@ -742,10 +1273,12 @@ function populateFileInfo(file) {
 
 // ── Main upload ───────────────────────────────────────────────────────────────
 async function handleUpload(file) {
-  if (!file || !file.name.toLowerCase().endsWith('.mp3')) {
-    setStatus('Please select a valid .mp3 file.', 'err'); return;
+  var lower = file ? file.name.toLowerCase() : '';
+  if (!file || !(lower.endsWith('.mp3') || lower.endsWith('.flac'))) {
+    setStatus('Please select a valid .mp3 or .flac file.', 'err'); return;
   }
-  showLoader(true, 'Parsing ID3 tags…');
+  S.fileType = lower.endsWith('.flac') ? 'flac' : 'mp3';
+  showLoader(true, (S.fileType === 'flac') ? 'Parsing FLAC tags…' : 'Parsing ID3 tags…');
   try {
     S.file         = file;
     S.buffer       = await file.arrayBuffer();
@@ -758,17 +1291,30 @@ async function handleUpload(file) {
     replaceArtBtn.textContent = '↑ Replace Art';
 
     // Parse tags with our custom parser
-    var tags = parseID3(S.buffer);
+    var tags = (S.fileType === 'flac') ? parseFlac(S.buffer) : parseID3(S.buffer);
+    if (!tags) {
+      setStatus('Could not parse file — invalid ' + (S.fileType === 'flac' ? 'FLAC' : 'MP3') + ' format.', 'err');
+      editorPanel.classList.add('hidden');
+      return;
+    }
     S.origTags = tags;
 
     populateForm(tags);
     populateFileInfo(file);
 
-    // Prefill output name
-    sv('outFilename', file.name.replace(/\.mp3$/i,'') + '');
+    // Prefill output name and update extension label
+    sv('outFilename', file.name.replace(/\.(mp3|flac)$/i,'') + '');
+    g('outFilenameExt').textContent = (S.fileType === 'flac') ? '.flac' : '.mp3';
 
     editorPanel.classList.remove('hidden');
-    var src = tags._found ? 'Tags read from ID3' + tags._found + '.' : 'No ID3 tags found — fields are blank.';
+    var src;
+    if (!tags._found) {
+      src = 'No tags found — fields are blank.';
+    } else if (tags._found === 'flac') {
+      src = 'Tags read from FLAC Vorbis comment.';
+    } else {
+      src = 'Tags read from ID3' + tags._found + '.';
+    }
     setStatus(src, '');
 
     // ── Auto-fetch: build query from tags or filename, then trigger autofill ──
@@ -784,7 +1330,7 @@ async function handleUpload(file) {
       } else {
         // Derive from filename: strip extension, normalize separators, remove common noise
         autoQuery = file.name
-          .replace(/\.mp3$/i, '')
+          .replace(/\.(mp3|flac)$/i, '')
           .replace(/[_]+/g, ' ')
           .replace(/\s*[\(\[]\s*(official\s*(video|audio|lyric|music|hd)?|video|audio|lyrics|hd|4k|ft\.?|feat\.?|remaster\w*|explicit)[^\)\]]*[\)\]]/gi, '')
           .replace(/\s+/g, ' ')
@@ -812,6 +1358,12 @@ async function handleUpload(file) {
 // ── Build + download ──────────────────────────────────────────────────────────
 async function buildAndDownload() {
   if (!S.buffer) { setStatus('No file loaded.', 'err'); return; }
+
+  // ── Dispatch to FLAC writer for FLAC files ──
+  if (S.fileType === 'flac') {
+    return buildAndDownloadFlac();
+  }
+
   if (typeof ID3Writer === 'undefined') {
     setStatus('ID3 writer library not loaded — check your internet connection.', 'err'); return;
   }
@@ -840,6 +1392,24 @@ async function buildAndDownload() {
     if (bp) writer.setFrame('TBPM', bp);
     if (cp) writer.setFrame('TCOP', cp);
 
+    // ── Lyrics: read from the UI textarea (editable) ──────────────────
+    // If the textarea is empty, no USLT frame is written (lyrics removed).
+    var lyrText = gv('inpLyrics');
+    if (lyrText) {
+      var lyrLang = gv('inpLyricsLang') || 'eng';
+      // USLT language must be a 3-char ISO-639-2 code; default to 'eng' if invalid.
+      if (!/^[a-zA-Z]{3}$/.test(lyrLang)) lyrLang = 'eng';
+      try {
+        writer.setFrame('USLT', {
+          language:    lyrLang.toLowerCase(),
+          description: gv('inpLyricsDesc') || '',
+          lyrics:      lyrText
+        });
+      } catch(e) {
+        console.warn('Could not write USLT lyrics frame:', e);
+      }
+    }
+
     // Cover art: new file > existing from original tags
     var coverBuf = null;
     if (S.newCoverFile) {
@@ -857,6 +1427,59 @@ async function buildAndDownload() {
     var name = (gv('outFilename') || '') + '.mp3';
     downloadBlob(blob, name);
     setStatus('✅ ' + name + ' downloaded!', 'ok');
+  } catch(e) {
+    console.error(e);
+    setStatus('Error: ' + e.message, 'err');
+  } finally {
+    showLoader(false);
+  }
+}
+
+// ── Build + download (FLAC) ───────────────────────────────────────────────────
+async function buildAndDownloadFlac() {
+  if (!S.buffer) { setStatus('No file loaded.', 'err'); return; }
+  showLoader(true, 'Writing FLAC Vorbis tags…');
+  setStatus('Writing FLAC tags…', '');
+  try {
+    var tags = {
+      title:       gv('inpTitle'),
+      artist:      gv('inpArtist'),
+      album:       gv('inpAlbum'),
+      year:        gv('inpYear'),
+      track:       gv('inpTrack'),
+      genre:       gv('inpGenre'),
+      comment:     gv('inpComment'),
+      albumArtist: gv('inpAlbumArtist'),
+      composer:    gv('inpComposer'),
+      disc:        gv('inpDisc'),
+      bpm:         gv('inpBpm'),
+      copyright:   gv('inpCopyright'),
+      // Lyrics: preserve the source field name so buildVorbisComment writes back
+      // to the same field (LYRICS vs UNSYNCEDLYRICS). If textarea is empty,
+      // buildVorbisComment skips writing the field entirely.
+      lyrics: {
+        field:       (S.origTags && S.origTags.lyrics && S.origTags.lyrics.field) || 'LYRICS',
+        language:    '',
+        description: '',
+        text:        gv('inpLyrics')
+      }
+    };
+
+    // Cover: new file > existing from original tags
+    var coverData = null, coverMime = null;
+    if (S.newCoverFile) {
+      var buf = await S.newCoverFile.arrayBuffer();
+      coverData = new Uint8Array(buf);
+      coverMime = S.newCoverFile.type || 'image/jpeg';
+    } else if (S.coverData && S.coverData.length > 0) {
+      coverData = S.coverData;
+      coverMime = S.coverMime || 'image/jpeg';
+    }
+
+    var blob = writeFlac(S.buffer, tags, coverData, coverMime, S.origTags && S.origTags._allComments);
+    var name = (gv('outFilename') || '') + '.flac';
+    downloadBlob(blob, name);
+    setStatus('\u2705 ' + name + ' downloaded!', 'ok');
   } catch(e) {
     console.error(e);
     setStatus('Error: ' + e.message, 'err');
@@ -886,8 +1509,9 @@ uploadZone.addEventListener('dragleave', function(){ uploadZone.classList.remove
 uploadZone.addEventListener('drop', function(e){
   e.preventDefault(); uploadZone.classList.remove('drag-over');
   var f = e.dataTransfer.files[0];
-  if (f && f.name.toLowerCase().endsWith('.mp3')) handleUpload(f);
-  else setStatus('Drop a valid .mp3 file.','err');
+  var fn = f && f.name.toLowerCase();
+  if (fn && (fn.endsWith('.mp3') || fn.endsWith('.flac'))) handleUpload(f);
+  else setStatus('Drop a valid .mp3 or .flac file.','err');
 });
 
 replaceArtBtn.addEventListener('click', function(){ artInput.click(); });
